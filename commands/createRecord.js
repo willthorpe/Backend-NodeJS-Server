@@ -74,7 +74,7 @@ function createRecipeRelationships(nodes, params) {
     //Create recipe
     if (recipe == null) {
         statements.push({
-            "statement": "CREATE (n:Recipe) SET n.name=$name RETURN id(n)",
+            "statement": "CREATE (n:Recipe) SET n.name=$name,n.tag=$tag,n.servings=$servings,n.prepTime=$prepTime,n.cookTime=$cookTime,n.method=$method RETURN id(n)",
             "parameters": {
                 "name": params.name,
                 "tag": params.tag,
