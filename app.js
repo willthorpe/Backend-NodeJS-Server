@@ -57,7 +57,7 @@ app.get("/ingredient", function (req, res) {
             if (data) {
                 var responseData = [];
                 for (var i = 0; i < data.length; i++) {
-                    console.log(data[i]['row'][0]);
+                    //Create new array for the output combining the responses
                     responseData.push({
                         'name': data[i]['row'][0]['name'],
                         'amount': data[i]['row'][1]['amount'],
@@ -74,7 +74,47 @@ app.get("/ingredient", function (req, res) {
 });
 
 app.get("/recipe", function (req, res) {
+    //Fetch the recipes for the user
+    var responseData = [];
 
+    fetch.fetchRecipes(req.query.user)
+        .then(function (response) {
+            var data = response.data.results[0].data;
+            if (data) {
+                for (var i = 0; i < data.length; i++) {
+                    //Create new array for the output combining the recipe responses
+                    responseData.push({
+                        'name': data[i]['row'][0]['name'],
+                        'tag': data[i]['row'][0]['tag'],
+                        'servings': data[i]['row'][0]['servings'],
+                        'prepTime': data[i]['row'][0]['prepTime'],
+                        'cookTime': data[i]['row'][0]['cookTime'],
+                        'method': data[i]['row'][0]['method'],
+                        'ingredients': [],
+                    });
+                }
+                return fetch.fetchRecipeIngredients(req.query.user)
+                    .then(function (ingredientResponse) {
+                        var data = ingredientResponse.data.results[0].data;
+                        if (data) {
+                            for (var i = 0; i < data.length; i++) {
+                                var index = responseData.findIndex(x => x.name === data[i]['row'][0]['name'])
+                                //Push ingredients to the output array
+                                responseData[index]['ingredients'].push({
+                                    'name': data[i]['row'][1]['name'],
+                                    'amount': data[i]['row'][2]['amount'],
+                                    'type': data[i]['row'][2]['type']
+                                })
+                            }
+                            return res.send(responseData);
+                        } else {
+                            return res.send("INGREDIENT ERROR")
+                        }
+                    });
+            } else {
+                return res.send("RECIPE ERROR");
+            }
+        });
 });
 
 var server = app.listen(3000, function () {
