@@ -7,6 +7,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const match = require("./commands/matchRecord");
 const create = require("./commands/createRecord");
+const fetch = require("./commands/fetchRecords");
 
 app.post("/ingredient", function (req, res) {
       //Check if the user and ingredient already exists in the app
@@ -46,6 +47,34 @@ app.post("/recipe", function (req, res) {
                 return res.send("ERROR");
             }
         });
+});
+
+app.get("/ingredient", function (req, res) {
+    //Fetch the ingredients for the user
+    fetch.fetchIngredients(req.query.user)
+        .then(function (response) {
+            var data = response.data.results[0].data;
+            if (data) {
+                var responseData = [];
+                for (var i = 0; i < data.length; i++) {
+                    console.log(data[i]['row'][0]);
+                    responseData.push({
+                        'name': data[i]['row'][0]['name'],
+                        'amount': data[i]['row'][1]['amount'],
+                        'type' : data[i]['row'][1]['type'],
+                        'location': data[i]['row'][1]['location'],
+                        'sellByDate' : data[i]['row'][1]['sellByDate']
+                    });
+                }
+                return res.send(responseData);
+            } else {
+                return res.send("ERROR");
+            }
+        });
+});
+
+app.get("/recipe", function (req, res) {
+
 });
 
 var server = app.listen(3000, function () {
