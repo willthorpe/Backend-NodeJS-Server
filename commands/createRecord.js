@@ -55,8 +55,6 @@ function createRecipeRelationships(nodes, params) {
 
     //Convert parameters to useful arrays
     var ingredients = JSON.parse(params.ingredients);
-    var amounts = JSON.parse(params.amounts);
-    var types = JSON.parse(params.types);
 
     //Array of statements that will be sent in the axios request
     var statements = [];
@@ -100,10 +98,10 @@ function createRecipeRelationships(nodes, params) {
             statements.push({
                 "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type}] -> (i) return i, re",
                 "parameters": {
-                    "ingredient": ingredients[i],
+                    "ingredient": ingredients[i]['name'],
                     "recipe": params.name,
-                    "amount": amounts[i],
-                    "type": types[i],
+                    "amount": amounts[i]['amount'],
+                    "type": types[i]['type'],
                 }
             });
         } 

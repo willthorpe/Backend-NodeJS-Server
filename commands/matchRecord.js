@@ -2,7 +2,7 @@ const axios = require('axios').default;
 const config = require("../example_config");
 
 //Check if the user and the ingredient are already in the app
-function matchIngredient (params, key) {
+function matchIngredient (params) {
         return axios.post(config.url, {
             "statements": [
                 {
