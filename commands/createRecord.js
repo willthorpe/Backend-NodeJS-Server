@@ -100,8 +100,8 @@ function createRecipeRelationships(nodes, params) {
                 "parameters": {
                     "ingredient": ingredients[i]['name'],
                     "recipe": params.name,
-                    "amount": amounts[i]['amount'],
-                    "type": types[i]['type'],
+                    "amount": ingredients[i]['amount'],
+                    "type": ingredients[i]['type'],
                 }
             });
         } 

@@ -10,21 +10,28 @@ const create = require("./commands/createRecord");
 const fetch = require("./commands/fetchRecords");
 
 app.post("/ingredient", function (req, res) {
-      //Check if the user and ingredient already exists in the app
+    //Check if the user and ingredient already exists in the app
     match.matchIngredient(req.query)
         //Get the response from matchParameters
         .then(function (makeResponse) {
             if (makeResponse.data.results[0].data || makeResponse.data.results[1].data) {
                 //Create the nodes and the relationships
                 return create.createIngredientRelationships(makeResponse.data.results, req.query);
-            }
+            } else {
+                res.send("Error when matching ingredient and user" + makeResponse.data.errors[0].code + " " + makeResponse.data.errors[0].message);
+}
         })
         //Get the response from createNodesandRelationships
         .then(function (createResponse) {
-            if (createResponse.data.results.data) {
-                return res.send("SUCCESS");
+            if (createResponse.data.results[0].data) {
+                return res.send("SUCCESS New ingredient node created " + createResponse.data.results[0].data[0].row[0]['name']);
             } else {
-                return res.send("ERROR");
+                return res.send("ERROR creating ingredient node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when creating ingredient " + error)
             }
         });
 });
@@ -37,14 +44,21 @@ app.post("/recipe", function (req, res) {
             if (makeResponse.data.results[0].data || makeResponse.data.results[1].data) {
                 //Create the nodes and the relationships
                 return create.createRecipeRelationships(makeResponse.data.results, req.query);
+            } else {
+                res.send("Error when matching recipe and user" + makeResponse.data.errors[0].code + " " + makeResponse.data.errors[0].message);
             }
         })
         //Get the response from createNodesandRelationships
         .then(function (createResponse) {
-            if (createResponse.data.results.data) {
-                return res.send("SUCCESS");
+            if (createResponse.data.results[0].data) {
+                return res.send("SUCCESS New recipe node created " + createResponse.data.results[0].data[0].row[0]['name']);
             } else {
-                return res.send("ERROR");
+                return res.send("ERROR creating recipe node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when creating recipe " + error)
             }
         });
 });
@@ -68,7 +82,12 @@ app.get("/ingredient", function (req, res) {
                 }
                 return res.send(responseData);
             } else {
-                return res.send("ERROR");
+                return res.send("ERROR when fetching ingredient node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when fetching ingredient " + error)
             }
         });
 });
@@ -89,7 +108,7 @@ app.get("/recipe", function (req, res) {
                         'servings': data[i]['row'][0]['servings'],
                         'prepTime': data[i]['row'][0]['prepTime'],
                         'cookTime': data[i]['row'][0]['cookTime'],
-                        'method': data[i]['row'][0]['method'],
+                        'method': JSON.parse(data[i]['row'][0]['method']),
                         'ingredients': [],
                     });
                 }
@@ -108,11 +127,16 @@ app.get("/recipe", function (req, res) {
                             }
                             return res.send(responseData);
                         } else {
-                            return res.send("INGREDIENT ERROR")
+                            return res.send("ERROR when fetching recipe node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
                         }
                     });
             } else {
-                return res.send("RECIPE ERROR");
+                return res.send("ERROR when fetching recipe node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when fetching recipe " + error)
             }
         });
 });
