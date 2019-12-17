@@ -3,7 +3,7 @@ var bodyParser = require("body-parser");
 var app = express();
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true}));
 
 const match = require("./commands/matchRecord");
 const create = require("./commands/createRecord");
@@ -12,14 +12,14 @@ const fetch = require("./commands/fetchRecords");
 app.post("/ingredient", function (req, res) {
     //Check if the user and ingredient already exists in the app
     match.matchIngredient(req.query)
-        //Get the response from matchParameters
+    //Get the response from matchParameters
         .then(function (makeResponse) {
             if (makeResponse.data.results[0].data || makeResponse.data.results[1].data) {
                 //Create the nodes and the relationships
                 return create.createIngredientRelationships(makeResponse.data.results, req.query);
             } else {
                 res.send("Error when matching ingredient and user" + makeResponse.data.errors[0].code + " " + makeResponse.data.errors[0].message);
-}
+            }
         })
         //Get the response from createNodesandRelationships
         .then(function (createResponse) {
@@ -39,7 +39,7 @@ app.post("/ingredient", function (req, res) {
 app.post("/recipe", function (req, res) {
     //Check if the user and recipe already exists in the app
     match.matchRecipe(req.query)
-        //Get the response from matchParameters
+    //Get the response from matchParameters
         .then(function (makeResponse) {
             if (makeResponse.data.results[0].data || makeResponse.data.results[1].data) {
                 //Create the nodes and the relationships
@@ -75,9 +75,9 @@ app.get("/ingredient", function (req, res) {
                     responseData.push({
                         'name': data[i]['row'][0]['name'],
                         'amount': data[i]['row'][1]['amount'],
-                        'type' : data[i]['row'][1]['type'],
+                        'type': data[i]['row'][1]['type'],
                         'location': data[i]['row'][1]['location'],
-                        'sellByDate' : data[i]['row'][1]['sellByDate']
+                        'sellByDate': data[i]['row'][1]['sellByDate']
                     });
                 }
                 return res.send(responseData);
@@ -137,6 +137,35 @@ app.get("/recipe", function (req, res) {
         .catch(function (error) {
             if (error) {
                 res.send("Error when fetching recipe " + error)
+            }
+        });
+});
+
+app.get("/list", function (req, res) {
+    //Fetch the shopping list for the user
+    fetch.fetchShoppingList(req.query)
+        .then(function (response) {
+            var data = response.data.results[0].data;
+            if (data) {
+                var responseData = [];
+                for (var i = 0; i < data.length; i++) {
+                    //Create new array for the output combining the response
+                    var amount = data[i]['row'][1] - data[i]['row'][2];
+                    if (amount > 0) {
+                        responseData.push({
+                            'name': data[i]['row'][0]['name'],
+                            'amount': amount,
+                        });
+                    }
+                }
+                return res.send(responseData);
+            } else {
+                return res.send("ERROR when fetching list node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when fetching shopping list " + error)
             }
         });
 });
