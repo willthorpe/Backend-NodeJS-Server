@@ -155,6 +155,7 @@ app.get("/list", function (req, res) {
                         responseData.push({
                             'name': data[i]['row'][0]['name'],
                             'amount': amount,
+                            'type' : data[i]['row'][3]
                         });
                     }
                 }
