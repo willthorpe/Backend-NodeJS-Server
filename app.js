@@ -7,7 +7,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const match = require("./commands/matchRecord");
 const create = require("./commands/createRecord");
-const fetch = require("./commands/fetchRecords");
+const fetch = require("./commands/fetchRecord");
+const update = require("./commands/updateRecord");
 
 app.post("/ingredient", function (req, res) {
     //Check if the user and ingredient already exists in the app
@@ -59,6 +60,24 @@ app.post("/recipe", function (req, res) {
         .catch(function (error) {
             if (error) {
                 res.send("Error when creating recipe " + error)
+            }
+        });
+});
+
+app.patch("/list", function (req, res) {
+    //Check if the user and recipe already exists in the app
+    update.updateShoppingList(req.query)
+        //Get the response from matchParameters
+        .then(function (response) {
+            if (response.data.results[0].data || response.data.results[1].data) {
+                return res.send("SUCCESS Shopping list updated " + response.data.results[0].data[0].row[0]['name']);
+            } else {
+                res.send("Error when updating shopping list" + response.data.errors[0].code + " " + response.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when updating shopping list " + error)
             }
         });
 });
