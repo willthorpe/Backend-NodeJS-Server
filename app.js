@@ -5,25 +5,36 @@ var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-const match = require("./commands/matchRecord");
-const create = require("./commands/createRecord");
-const fetch = require("./commands/fetchRecord");
-const update = require("./commands/updateRecord");
-const unlink = require("./commands/unlinkRecord");
+const match = require("./database/matchRecord");
+const create = require("./database/createRecord");
+const fetch = require("./database/fetchRecord");
+const update = require("./database/updateRecord");
+const unlink = require("./database/unlinkRecord");
+
+const edanam = require("./apis/edanam");
 
 app.post("/ingredient", function (req, res) {
     //Check if the user and ingredient already exists in the app
+    var user = null;
+    var ingredient = null;
+
     match.matchIngredient(req.query)
     //Get the response from matchParameters
         .then(function (makeResponse) {
             if (makeResponse.data.results[0].data || makeResponse.data.results[1].data) {
-                //Create the nodes and the relationships
-                return create.createIngredientRelationships(makeResponse.data.results, req.query);
+                user = makeResponse.data.results[0].data[0];
+                ingredient = makeResponse.data.results[1].data[0];
+                //Get nutritional data for ingredient
+                return edanam.fetchNutritionalInfo(req.query.name, req.query.type);
             } else {
                 res.send("Error when matching ingredient and user" + makeResponse.data.errors[0].code + " " + makeResponse.data.errors[0].message);
             }
-        })
-        //Get the response from createNodesandRelationships
+        }).then(function (nutritionResponse) {
+            console.log(nutritionResponse);
+        //Create the nodes and the relationships
+        return create.createIngredientRelationships(user, ingredient, req.query, nutritionResponse.data);
+    })
+    //Get the response from createNodesandRelationships
         .then(function (createResponse) {
             if (createResponse.data.results[0].data) {
                 return res.send("SUCCESS New ingredient node created " + createResponse.data.results[0].data[0].row[0]['name']);
@@ -68,7 +79,7 @@ app.post("/recipe", function (req, res) {
 app.patch("/list", function (req, res) {
     //Check if the user and recipe already exists in the app
     update.updateShoppingList(req.query)
-        //Get the response from matchParameters
+    //Get the response from matchParameters
         .then(function (response) {
             if (response.data.results[0].data || response.data.results[1].data) {
                 return res.send("SUCCESS Shopping list updated " + response.data.results[0].data[0].row[0]['name']);
@@ -175,7 +186,7 @@ app.get("/list", function (req, res) {
                         responseData.push({
                             'name': data[i]['row'][0]['name'],
                             'amount': amount,
-                            'type' : data[i]['row'][3]
+                            'type': data[i]['row'][3]
                         });
                     }
                 }

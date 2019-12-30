@@ -2,11 +2,7 @@ const axios = require('axios').default;
 const config = require("../example_config");
 
 //Create nodes and relationships between user and ingredients
-function createIngredientRelationships(nodes, params) {
-    console.log(nodes);
-    var user = nodes[0].data[0];
-    var ingredient = nodes[1].data[0];
-
+function createIngredientRelationships(user, ingredient, params, nutrition) {
     //Array of statements that will be sent in the axios request
     var statements = [];
 
@@ -22,14 +18,34 @@ function createIngredientRelationships(nodes, params) {
 
     //Create ingredient
     if (ingredient == null) {
+        var ingredientParameters = {
+            "name": params.name,
+            "calories": nutrition.calories,
+            "weight": nutrition.totalWeight,
+            "dietLabels": nutrition.dietLabels.toString(),
+            "healthLabels": nutrition.healthLabels.toString(),
+            "energy": nutrition.totalNutrients.ENERC_KCAL.quantity,
+        };
+        if(nutrition.totalNutrients.FAT){
+            ingredientParameters["fat"] = nutrition.totalNutrients.FAT.quantity;
+        }else{
+            ingredientParameters["fat"] = 0;
+        }
+        if(nutrition.totalNutrients.CHOCDF){
+            ingredientParameters["carbs"] = nutrition.totalNutrients.CHOCDF.quantity;
+        }else{
+            ingredientParameters["carbs"] = 0;
+        }
+        if(nutrition.totalNutrients.PROCNT){
+            ingredientParameters["protein"] = nutrition.totalNutrients.PROCNT.quantity;
+        }else{
+            ingredientParameters["protein"] = 0;
+        }
         statements.push({
-            "statement": "CREATE (n:Ingredient) SET n.name=$name RETURN id(n)",
-            "parameters": {
-                "name": params.name,
-            }
+            "statement": "CREATE (n:Ingredient) SET n.name=$name, n.calories=$calories, n.weight=$weight,n.energy=$energy,n.fat=$fat,n.carbs=$carbs,n.protein=$protein, n.dietLabels=$dietLabels,n.healthLabels=$healthLabels RETURN id(n)",
+            "parameters": ingredientParameters
         });
     }
-
     //Create link from user to ingredient
     statements.push({
         "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, sellByDate: $sellByDate }] -> (i) return u, i",
@@ -42,7 +58,6 @@ function createIngredientRelationships(nodes, params) {
             "location": params.location,
         }
     });
-
     return axios.post(config.url, {
         "statements": statements,
     });
@@ -79,7 +94,7 @@ function createRecipeRelationships(nodes, params) {
                 "servings": params.servings,
                 "prepTime": params.prepTime,
                 "cookTime": params.cookTime,
-                "method" : params.methods
+                "method": params.methods
             }
         });
     }
@@ -104,11 +119,12 @@ function createRecipeRelationships(nodes, params) {
                     "type": ingredients[i]['type'],
                 }
             });
-        } 
+        }
     }
     return axios.post(config.url, {
         "statements": statements,
     });
 }
+
 module.exports.createIngredientRelationships = createIngredientRelationships;
 module.exports.createRecipeRelationships = createRecipeRelationships;

@@ -39,7 +39,36 @@ function matchRecipe(params) {
             }
         ],
     })
-} 
+}
 
+//Check if the diet is already in the app
+function matchDiet (diet) {
+    return axios.post(config.url, {
+        "statements": [
+            {
+                "statement": "MATCH (n:Diet) WHERE n.name=$name RETURN id(n)",
+                "parameters": {
+                    "name": diet,
+                }
+            },
+        ],
+    })
+}
+
+//Check if the health concern is already in the app
+function matchHealth (health) {
+    return axios.post(config.url, {
+        "statements": [
+            {
+                "statement": "MATCH (n:Health) WHERE n.name=$name RETURN id(n)",
+                "parameters": {
+                    "name": health,
+                }
+            },
+        ],
+    })
+}
 module.exports.matchIngredient = matchIngredient;
 module.exports.matchRecipe = matchRecipe;
+module.exports.matchDiet = matchDiet;
+module.exports.matchHealth = matchHealth;
