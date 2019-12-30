@@ -9,6 +9,7 @@ const match = require("./commands/matchRecord");
 const create = require("./commands/createRecord");
 const fetch = require("./commands/fetchRecord");
 const update = require("./commands/updateRecord");
+const unlink = require("./commands/unlinkRecord");
 
 app.post("/ingredient", function (req, res) {
     //Check if the user and ingredient already exists in the app
@@ -186,6 +187,24 @@ app.get("/list", function (req, res) {
         .catch(function (error) {
             if (error) {
                 res.send("Error when fetching shopping list " + error)
+            }
+        });
+});
+
+app.patch("/recipe", function (req, res) {
+    //Check if the user and recipe already exists in the app
+    unlink.deleteRecipe(req.query)
+    //Get the response from matchParameters
+        .then(function (response) {
+            if (response.data.results[0].data || response.data.results[1].data) {
+                return res.send("SUCCESS Recipe deleted for " + response.data.results[0].data[0].row[0]['name']);
+            } else {
+                res.send("Error when deleting recipe" + response.data.errors[0].code + " " + response.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when deleting recipe " + error)
             }
         });
 });
