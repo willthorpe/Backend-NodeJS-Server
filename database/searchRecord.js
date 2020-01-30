@@ -65,7 +65,7 @@ function searchRecipe(userIngredients, recipes, searchParameters) {
         console.log("Less ingredients");
         ingredients = recipes[0].data[k].row[1].length;
         if (ingredients <= 10) {
-            score = score + (searchParameters[4] / ingredients);
+            score = score + (ingredients/10 * searchParameters[4]);
             console.log(score);
         }
 
@@ -73,7 +73,7 @@ function searchRecipe(userIngredients, recipes, searchParameters) {
         console.log("Less complex recipes");
         method = JSON.parse(recipes[0].data[k].row[0].method).length;
         if (method <= 10) {
-            score = score + (searchParameters[5] / method);
+            score = score + (method/10 * searchParameters[5]);
             console.log(score);
         }
 
@@ -81,7 +81,7 @@ function searchRecipe(userIngredients, recipes, searchParameters) {
         console.log("Shorter Recipes");
         time = parseInt(recipes[0].data[k].row[0].cookTime) + parseInt(recipes[0].data[k].row[0].prepTime)
         if (time <= 60) {
-            score = score + (searchParameters[6] / time);
+            score = score + (time/60 * searchParameters[6]);
             console.log(score);
         }
 
