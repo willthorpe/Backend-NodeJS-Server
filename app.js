@@ -94,11 +94,14 @@ app.patch("/list", function (req, res) {
         });
 });
 
-app.get("/ingredient", function (req, res) {
-    var parameters = req.body
+app.get("/ingredient/:user", function (req, res) {
+    var parameters = req.params;
+    console.log("hello");
+    console.log(parameters);
     //Fetch the ingredients for the user
     fetch.fetchIngredients(parameters.user)
         .then(function (response) {
+	    console.log(response);
             var data = response.data.results[0].data;
             if (data) {
                 var responseData = [];
@@ -109,8 +112,9 @@ app.get("/ingredient", function (req, res) {
                         'amount': data[i]['row'][1]['amount'],
                         'type': data[i]['row'][1]['type'],
                         'location': data[i]['row'][1]['location'],
-                        'sellByDate': data[i]['row'][1]['sellByDate']
+                        'useByDate': data[i]['row'][1]['useByDate']
                     });
+		    console.log(responseData);
                 }
                 return res.send(responseData);
             } else {
@@ -124,10 +128,10 @@ app.get("/ingredient", function (req, res) {
         });
 });
 
-app.get("/recipe", function (req, res) {
+app.get("/recipe/:user", function (req, res) {
     //Fetch the recipes for the user
     var responseData = [];
-    var parameters = req.body;
+    var parameters = req.params;
 
     fetch.fetchRecipes(parameters.user)
         .then(function (response) {
@@ -174,8 +178,8 @@ app.get("/recipe", function (req, res) {
         });
 });
 
-app.get("/list", function (req, res) {
-    var parameters = req.body;
+app.get("/list/:user/:calendar", function (req, res) {
+    var parameters = req.params;
     //Fetch the shopping list for the user
     fetch.fetchShoppingList(parameters)
         .then(function (response) {
@@ -205,8 +209,8 @@ app.get("/list", function (req, res) {
         });
 });
 
-app.patch("/recipe", function (req, res) {
-    var parameters = req.body;
+app.patch("/recipe/:user/:search", function (req, res) {
+    var parameters = req.params;
     //Check if the user and recipe already exists in the app
     unlink.deleteRecipe(parameters)
     //Get the response from matchParameters
