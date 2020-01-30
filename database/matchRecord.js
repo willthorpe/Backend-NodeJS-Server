@@ -1,5 +1,5 @@
 const axios = require('axios').default;
-const config = require("../example_config");
+const config = require("../config");
 
 //Check if the user and the ingredient are already in the app
 function matchIngredient (params) {
@@ -68,6 +68,7 @@ function matchHealth (health) {
         ],
     })
 }
+
 module.exports.matchIngredient = matchIngredient;
 module.exports.matchRecipe = matchRecipe;
 module.exports.matchDiet = matchDiet;

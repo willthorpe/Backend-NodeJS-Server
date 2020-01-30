@@ -1,5 +1,5 @@
 const axios = require('axios').default;
-const config = require("../example_config");
+const config = require("../config");
 
 //Fetch all the ingredients related to the user. 
 function fetchIngredients(user) {
@@ -24,6 +24,17 @@ function fetchRecipes(user) {
                 "parameters": {
                     "user": user,
                 }
+            },
+        ],
+    })
+}
+
+//Fetch all the recipes
+function fetchAllRecipes() {
+    return axios.post(config.url, {
+        "statements": [
+            {
+                "statement": "MATCH (re:Recipe)-[r:contains]-> (i:Ingredient) RETURN distinct re,collect([i,r])"
             },
         ],
     })
@@ -88,6 +99,7 @@ function fetchShoppingList(params) {
 
 module.exports.fetchIngredients = fetchIngredients;
 module.exports.fetchRecipes = fetchRecipes;
+module.exports.fetchAllRecipes = fetchAllRecipes;
 module.exports.fetchRecipeIngredients = fetchRecipeIngredients;
 module.exports.fetchShoppingList = fetchShoppingList;
 

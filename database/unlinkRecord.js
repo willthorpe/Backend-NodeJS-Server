@@ -1,5 +1,5 @@
 const axios = require('axios').default;
-const config = require("../example_config");
+const config = require("../config");
 
 
 //Delete recipe for one user

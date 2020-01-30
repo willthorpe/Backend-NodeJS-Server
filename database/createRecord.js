@@ -1,5 +1,5 @@
 const axios = require('axios').default;
-const config = require("../example_config");
+const config = require("../config");
 
 //Create nodes and relationships between user and ingredients
 function createIngredientRelationships(user, ingredient, params, nutrition) {
@@ -15,6 +15,8 @@ function createIngredientRelationships(user, ingredient, params, nutrition) {
             }
         });
     }
+
+    console.log(nutrition);
 
     //Create ingredient
     if (ingredient == null) {

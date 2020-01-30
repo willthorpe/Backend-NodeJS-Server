@@ -1,5 +1,5 @@
 const axios = require('axios').default;
-const config = require("../example_config");
+const config = require("../config");
 
 function fetchNutritionalInfo(ingredient, type) {
     if (type === "number") {

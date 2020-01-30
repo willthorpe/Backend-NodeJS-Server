@@ -10,6 +10,7 @@ const create = require("./database/createRecord");
 const fetch = require("./database/fetchRecord");
 const update = require("./database/updateRecord");
 const unlink = require("./database/unlinkRecord");
+const search = require("./database/searchRecord");
 
 const edanam = require("./apis/edanam");
 
@@ -94,10 +95,8 @@ app.patch("/list", function (req, res) {
         });
 });
 
-app.get("/ingredient/:user", function (req, res) {
-    var parameters = req.params;
-    console.log("hello");
-    console.log(parameters);
+app.get("/ingredient", function (req, res) {
+    var parameters = req.query;
     //Fetch the ingredients for the user
     fetch.fetchIngredients(parameters.user)
         .then(function (response) {
@@ -128,10 +127,10 @@ app.get("/ingredient/:user", function (req, res) {
         });
 });
 
-app.get("/recipe/:user", function (req, res) {
+app.get("/recipe", function (req, res) {
     //Fetch the recipes for the user
     var responseData = [];
-    var parameters = req.params;
+    var parameters = req.query;
 
     fetch.fetchRecipes(parameters.user)
         .then(function (response) {
@@ -178,8 +177,8 @@ app.get("/recipe/:user", function (req, res) {
         });
 });
 
-app.get("/list/:user/:calendar", function (req, res) {
-    var parameters = req.params;
+app.get("/list", function (req, res) {
+    var parameters = req.query;
     //Fetch the shopping list for the user
     fetch.fetchShoppingList(parameters)
         .then(function (response) {
@@ -209,8 +208,8 @@ app.get("/list/:user/:calendar", function (req, res) {
         });
 });
 
-app.patch("/recipe/:user/:search", function (req, res) {
-    var parameters = req.params;
+app.patch("/recipe/", function (req, res) {
+    var parameters = req.body;
     //Check if the user and recipe already exists in the app
     unlink.deleteRecipe(parameters)
     //Get the response from matchParameters
@@ -224,6 +223,30 @@ app.patch("/recipe/:user/:search", function (req, res) {
         .catch(function (error) {
             if (error) {
                 res.send("Error when deleting recipe " + error)
+            }
+        });
+});
+
+app.get("/search", function (req, res) {
+    var parameters = req.query;
+    var recipes = []
+    //Return results for the user query
+    fetch.fetchAllRecipes()
+        .then(function (fetchResponse) {
+            recipes = fetchResponse.data.results;
+            return fetch.fetchIngredients(parameters.user);
+        }).then(function (ingredientResponse) {
+            return search.searchRecipe(ingredientResponse.data.results[0], recipes, JSON.parse(parameters.search))
+        }).then(function (searchResponse) {
+            if (searchResponse != null) {
+                return res.send(searchResponse);
+            } else {
+                res.send("Error when searching recipe");
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when searching recipe " + error)
             }
         });
 });

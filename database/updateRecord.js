@@ -1,6 +1,6 @@
 
 const axios = require('axios').default;
-const config = require("../example_config");
+const config = require("../config");
 
 //Update shopping list
 function updateShoppingList(params) {
