@@ -17,26 +17,25 @@ app.post("/ingredient", function (req, res) {
     //Check if the user and ingredient already exists in the app
     var user = null;
     var ingredient = null;
-
-    match.matchIngredient(req.query)
+    var parameters = req.body;
+    match.matchIngredient(parameters)
     //Get the response from matchParameters
         .then(function (makeResponse) {
-            if (makeResponse.data.results[0].data || makeResponse.data.results[1].data) {
+            if (makeResponse.data.results.length == 2) {
                 user = makeResponse.data.results[0].data[0];
                 ingredient = makeResponse.data.results[1].data[0];
-                //Get nutritional data for ingredient
-                return edanam.fetchNutritionalInfo(req.query.name, req.query.type);
-            } else {
-                res.send("Error when matching ingredient and user" + makeResponse.data.errors[0].code + " " + makeResponse.data.errors[0].message);
             }
+                //Get nutritional data for ingredient
+		console.log(parameters);
+                return edanam.fetchNutritionalInfo(parameters.name, parameters.type);
         }).then(function (nutritionResponse) {
-            console.log(nutritionResponse);
         //Create the nodes and the relationships
-        return create.createIngredientRelationships(user, ingredient, req.query, nutritionResponse.data);
+        return create.createIngredientRelationships(user, ingredient, parameters, nutritionResponse.data);
     })
     //Get the response from createNodesandRelationships
         .then(function (createResponse) {
             if (createResponse.data.results[0].data) {
+                console.log(createResponse.data.errors[0]);
                 return res.send("SUCCESS New ingredient node created " + createResponse.data.results[0].data[0].row[0]['name']);
             } else {
                 return res.send("ERROR creating ingredient node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
@@ -50,13 +49,14 @@ app.post("/ingredient", function (req, res) {
 });
 
 app.post("/recipe", function (req, res) {
+    var parameters = req.body;
     //Check if the user and recipe already exists in the app
-    match.matchRecipe(req.query)
+    match.matchRecipe(parameters)
     //Get the response from matchParameters
         .then(function (makeResponse) {
             if (makeResponse.data.results[0].data || makeResponse.data.results[1].data) {
                 //Create the nodes and the relationships
-                return create.createRecipeRelationships(makeResponse.data.results, req.query);
+                return create.createRecipeRelationships(makeResponse.data.results, parameters);
             } else {
                 res.send("Error when matching recipe and user" + makeResponse.data.errors[0].code + " " + makeResponse.data.errors[0].message);
             }
@@ -77,8 +77,8 @@ app.post("/recipe", function (req, res) {
 });
 
 app.patch("/list", function (req, res) {
-    //Check if the user and recipe already exists in the app
-    update.updateShoppingList(req.query)
+    var parameters = req.body;
+    update.updateShoppingList(parameters)
     //Get the response from matchParameters
         .then(function (response) {
             if (response.data.results[0].data || response.data.results[1].data) {
@@ -95,8 +95,9 @@ app.patch("/list", function (req, res) {
 });
 
 app.get("/ingredient", function (req, res) {
+    var parameters = req.body
     //Fetch the ingredients for the user
-    fetch.fetchIngredients(req.query.user)
+    fetch.fetchIngredients(parameters.user)
         .then(function (response) {
             var data = response.data.results[0].data;
             if (data) {
@@ -126,8 +127,9 @@ app.get("/ingredient", function (req, res) {
 app.get("/recipe", function (req, res) {
     //Fetch the recipes for the user
     var responseData = [];
+    var parameters = req.body;
 
-    fetch.fetchRecipes(req.query.user)
+    fetch.fetchRecipes(parameters.user)
         .then(function (response) {
             var data = response.data.results[0].data;
             if (data) {
@@ -143,7 +145,7 @@ app.get("/recipe", function (req, res) {
                         'ingredients': [],
                     });
                 }
-                return fetch.fetchRecipeIngredients(req.query.user)
+                return fetch.fetchRecipeIngredients(parameters.user)
                     .then(function (ingredientResponse) {
                         var data = ingredientResponse.data.results[0].data;
                         if (data) {
@@ -173,8 +175,9 @@ app.get("/recipe", function (req, res) {
 });
 
 app.get("/list", function (req, res) {
+    var parameters = req.body;
     //Fetch the shopping list for the user
-    fetch.fetchShoppingList(req.query)
+    fetch.fetchShoppingList(parameters)
         .then(function (response) {
             var data = response.data.results[0].data;
             if (data) {
@@ -203,8 +206,9 @@ app.get("/list", function (req, res) {
 });
 
 app.patch("/recipe", function (req, res) {
+    var parameters = req.body;
     //Check if the user and recipe already exists in the app
-    unlink.deleteRecipe(req.query)
+    unlink.deleteRecipe(parameters)
     //Get the response from matchParameters
         .then(function (response) {
             if (response.data.results[0].data || response.data.results[1].data) {

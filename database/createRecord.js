@@ -48,13 +48,13 @@ function createIngredientRelationships(user, ingredient, params, nutrition) {
     }
     //Create link from user to ingredient
     statements.push({
-        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, sellByDate: $sellByDate }] -> (i) return u, i",
+        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate }] -> (i) return u, i",
         "parameters": {
             "user": params.user,
             "ingredient": params.name,
             "amount": params.amount,
             "type": params.type,
-            "sellByDate": params.sellByDate,
+            "useByDate": params.useByDate,
             "location": params.location,
         }
     });
