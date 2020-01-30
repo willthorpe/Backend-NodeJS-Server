@@ -3,15 +3,15 @@ const config = require("../config");
 
 //Search the recipes
 function searchRecipe(userIngredients, recipes, searchParameters) {
-    var order = [
-        'Prefer Owned Ingredients',
-        'Prefer Lighter Weight',
-        'Prefer Variety',
-        'Prefer Popular Recipes',
-        'Prefer Less Ingredients',
-        'Prefer Less Complex Recipes',
-        'Prefer Shorter Recipes'
-    ];
+    //var order = [
+        //'Prefer Owned Ingredients',
+        //'Prefer Lighter Weight',
+        //'Prefer Variety',
+        //'Prefer Popular Recipes',
+        //'Prefer Less Ingredients',
+        //'Prefer Less Complex Recipes',
+        //'Prefer Shorter Recipes'
+    //];
     var recipeScores = []
     var total = 0;
     //Calculate preference weighting compared to other preferences
@@ -22,7 +22,6 @@ function searchRecipe(userIngredients, recipes, searchParameters) {
         searchParameters[j] = searchParameters[j] / total * 100
     }
 
-    var recipeName = null; 
     for (var k = 0; k < recipes[0].data.length; k++) {
         console.log(recipes[0].data[k].row[0].name);
         var score = 0;
