@@ -86,9 +86,16 @@ function searchRecipe(userIngredients, recipes, searchParameters) {
         }
 
         var recipeDetails = recipes[0].data[k].row[0];
+        var methodList = JSON.parse(recipes[0].data[k].row[0].method);
         var ingredientList = recipes[0].data[k].row[1];
-        recipeScores.push({recipe:recipeDetails, ingredients:ingredientList, score : score });
+        recipeScores.push({recipe:recipeDetails, method: methodList, ingredients:ingredientList, score : Math.round(score) });
     }
+
+    //Sort recipes by score descending:
+    recipeScores.sort(function (a, b) {
+        return b.score - a.score
+    })
+
     return recipeScores;
 }
 
