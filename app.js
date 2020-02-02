@@ -236,7 +236,7 @@ app.get("/search", function (req, res) {
             recipes = fetchResponse.data.results;
             return fetch.fetchIngredients(parameters.user);
         }).then(function (ingredientResponse) {
-            return search.searchRecipe(ingredientResponse.data.results[0], recipes, JSON.parse(parameters.search))
+            return search.searchRecipe(ingredientResponse.data.results[0], recipes, JSON.parse(parameters.search), JSON.parse(parameters.diets),JSON.parse(parameters.allergies))
         }).then(function (searchResponse) {
             if (searchResponse != null) {
                 return res.send(searchResponse);

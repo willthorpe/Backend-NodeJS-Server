@@ -2,7 +2,7 @@ const axios = require('axios').default;
 const config = require("../config");
 
 //Search the recipes
-function searchRecipe(userIngredients, recipes, searchParameters) {
+function searchRecipe(userIngredients, recipes, searchParameters, diets, allergies) {
     //var order = [
         //'Prefer Owned Ingredients',
         //'Prefer Lighter Weight',
@@ -11,6 +11,7 @@ function searchRecipe(userIngredients, recipes, searchParameters) {
         //'Prefer Less Ingredients',
         //'Prefer Less Complex Recipes',
         //'Prefer Shorter Recipes'
+        //'Prefer Matching Diet',
     //];
     var recipeScores = []
     var total = 0;
@@ -26,13 +27,28 @@ function searchRecipe(userIngredients, recipes, searchParameters) {
         console.log(recipes[0].data[k].row[0].name);
         var score = 0;
         var totalRecipeWeight = 0    
-        
+        var meetsAllergies = true;
+
         /**
         * Check over ingredients
         */
         for (var l = 0; l < recipes[0].data[k].row[1].length; l++) {
+            /**
+             * Exclude ingredients that don't meet allergy concerns
+            */
+            var ingredientAllergies = recipes[0].data[k].row[1][l][0].healthLabels.split(",");
+            for (var a = 0; a < allergies.length; a++) {
+                if (allergies[a].value == 1 && !ingredientAllergies.includes(allergies[a].name)) {
+                    meetsAllergies = false
+                }
+            }
             var weightOne = recipes[0].data[k].row[1][l][0].weight / 100;
             totalRecipeWeight = totalRecipeWeight + (parseInt(recipes[0].data[k].row[1][l][1].amount * weightOne));
+        }
+
+        if (meetsAllergies == false) {
+            //Break out of the loop here to avoid any more calculations
+            continue;
         }
 
         console.log(totalRecipeWeight);
@@ -47,10 +63,24 @@ function searchRecipe(userIngredients, recipes, searchParameters) {
 
 
             for (var n = 0; n < userIngredients.data.length; n++) {
+                var weightOne = recipes[0].data[m].row[1][m][0].weight / 100;
+                var matchDiets = true;
+
+                //Check Prefer Matching Diet - 7
+                var ingredientDiets = recipes[0].data[k].row[1][l][0].dietLabels.split(",");
+                for (var d = 0; d < diets.length; a++) {
+                    if (diets[a].value == 1 && !ingredientDiets.includes(diets[a].name)) {
+                        matchDiets = false;   
+                    }
+                }
+
+                if (matchDiets == true) {
+                    score = score + (searchParameters[7] * ((recipes[0].data[m].row[1][m][1].amount * weightOne) / totalRecipeWeight));
+                }
+
+                //Check Prefer Owned Ingredients - 0
                 if (recipes[0].data[k].row[1][m][0].name == userIngredients.data[n].row[0].name && userIngredients.data[n].row[0].amount >= recipes[0].data[k].row[1][m][1].amount) {
-                    //Check Prefer Owned Ingredients - 0
                     console.log("Owned Ingredients");
-                    var weightOne = recipes[0].data[m].row[1][m][0].weight / 100;
                     score = score + (searchParameters[0] * ((recipes[0].data[m].row[1][m][1].amount * weightOne) / totalRecipeWeight));
                     console.log(score);
                 }
