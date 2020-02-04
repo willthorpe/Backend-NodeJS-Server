@@ -127,6 +127,39 @@ app.get("/ingredient", function (req, res) {
         });
 });
 
+app.get("/nextRecipe", function (req, res) {
+    var parameters = req.query;
+
+    fetch.fetchRecipe(parameters.recipe)
+        .then(function (response) {
+            var responseData = {
+                'name': response.data.results[0].data[0]['row'][0]['name'],
+                'tag': response.data.results[0].data[0]['row'][0]['tag'],
+                'servings': response.data.results[0].data[0]['row'][0]['servings'],
+                'prepTime': response.data.results[0].data[0]['row'][0]['prepTime'],
+                'cookTime': response.data.results[0].data[0]['row'][0]['cookTime'],
+                'method': JSON.parse(response.data.results[0].data[0]['row'][0]['method']),
+                'ingredients': [],
+            };
+
+            for (var i = 0; i < response.data.results[0].data.length; i++) {
+                responseData.ingredients.push(
+                    {
+                        'name': response.data.results[0].data[i]['row'][2]['name'],
+                        'amount': response.data.results[0].data[i]['row'][1]['amount'],
+                        'type': response.data.results[0].data[i]['row'][1]['type']
+                    }
+                );
+            }
+            res.send(responseData);
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when fetching recipe " + error)
+            }
+        });
+});
+
 app.get("/recipe", function (req, res) {
     //Fetch the recipes for the user
     var responseData = [];

@@ -15,6 +15,20 @@ function fetchIngredients(user) {
     })
 }
 
+//Fetch a single recipe. 
+function fetchRecipe(recipe) {
+    return axios.post(config.url, {
+        "statements": [
+            {
+                "statement": "MATCH (u:User)-[r:makes]->(re:Recipe)-[p:contains]->(i:Ingredient) WHERE re.name=$name RETURN re,p,i",
+                "parameters": {
+                    "name": recipe,
+                }
+            },
+        ],
+    })
+}
+
 //Fetch all the recipes related to the user. 
 function fetchRecipes(user) {
     return axios.post(config.url, {
@@ -108,6 +122,7 @@ function fetchShoppingList(params) {
 }
 
 module.exports.fetchIngredients = fetchIngredients;
+module.exports.fetchRecipe = fetchRecipe;
 module.exports.fetchRecipes = fetchRecipes;
 module.exports.fetchAllRecipes = fetchAllRecipes;
 module.exports.fetchRecipeIngredients = fetchRecipeIngredients;
