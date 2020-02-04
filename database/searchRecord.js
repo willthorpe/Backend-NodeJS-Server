@@ -24,7 +24,6 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
     }
     console.log(searchParameters);
     for (var k = 0; k < recipes[0].data.length; k++) {
-        console.log(recipes[0].data[k].row[0].name);
         var score = 0;
         var totalRecipeWeight = 0;    
         var meetsAllergies = true;
@@ -36,7 +35,6 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
              * Exclude ingredients that don't meet allergy concerns
             */
             var ingredientAllergies = recipes[0].data[k].row[1][l][0].healthLabels.split(",");
-            console.log(ingredientAllergies);
 	    for (var a = 0; a < allergies.length; a++) {
                 if (allergies[a].value == 1 && !ingredientAllergies.includes(allergies[a].name)) {
                     meetsAllergies = false
@@ -54,36 +52,35 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
         for (var m = 0; m < recipes[0].data[k].row[1].length; m++) {
             //Check Prefer Lighter Weight - 1
             console.log("Lighter Weight");
-	    console.log(recipes[0].data[k].row[1][m][0]);
             var weightOne = parseFloat(recipes[0].data[k].row[1][m][0].weight / 100);
             if (weightOne <= 300) {
                 score = score + (searchParameters[1] * ((recipes[0].data[k].row[1][m][1].amount * weightOne) / totalRecipeWeight));
                 console.log(score);
             }
+            //Check Prefer Matching Diet - 7
+            console.log("Prefer Matching Diet");
+            var matchDiets = true;
+            var ingredientDiets = recipes[0].data[k].row[1][m][0].dietLabels.split(",");
+            for (var d = 0; d < diets.length; d++) {
+                if (diets[d].value == 1 && !ingredientDiets.includes(diets[d].name)) {
+                    matchDiets = false;
+                }
+            }
+            if (matchDiets == true) {
+                score = score + (searchParameters[7] * ((recipes[0].data[k].row[1][m][1].amount * weightOne) / totalRecipeWeight));
+                console.log(score)
+            }
             for (var n = 0; n < userIngredients.data.length; n++) {
                 var weightOne = parseFloat(recipes[0].data[k].row[1][m][0].weight / 100);
-                var matchDiets = true;
-                //Check Prefer Matching Diet - 7
-		console.log("Prefer Matching Diet");
-                var ingredientDiets = recipes[0].data[k].row[1][m][0].dietLabels.split(",");
-		console.log(ingredientDiets);
-                for (var d = 0; d < diets.length; d++) {
-                    if (diets[d].value == 1 && !ingredientDiets.includes(diets[d].name)) {
-                        matchDiets = false;   
-                    }
-                }
-                if (matchDiets == true) {
-                    score = score + (searchParameters[7] * ((recipes[0].data[k].row[1][m][1].amount * weightOne) / totalRecipeWeight));
-                }
-		console.log("yes");
                 //Check Prefer Owned Ingredients - 0
-		console.log("Prefer Owned Ingredients");
+		        console.log("Prefer Owned Ingredients");
                 if (recipes[0].data[k].row[1][m][0].name == userIngredients.data[n].row[0].name && userIngredients.data[n].row[0].amount >= recipes[0].data[k].row[1][m][1].amount) {
                     console.log("Owned Ingredient");
                     score = score + (searchParameters[0] * ((recipes[0].data[k].row[1][m][1].amount * weightOne) / totalRecipeWeight));
                     console.log(score);
                 }
             }
+           
         }
 
         //Check Prefer Variety - 2
@@ -118,7 +115,6 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
         var methodList = JSON.parse(recipes[0].data[k].row[0].method);
         var ingredientList = recipes[0].data[k].row[1];
         recipeScores.push({recipe:recipeDetails, method: methodList, ingredients:ingredientList, score : Math.round(score) });
-	console.log(recipeScores);
     }
 
     //Sort recipes by score descending:
