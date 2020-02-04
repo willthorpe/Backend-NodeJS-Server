@@ -61,33 +61,43 @@ function fetchShoppingList(params) {
     var recipes = [];
     //Array of statements that will be sent in the axios request
     var statements = [];
-
     //Manipulate recipes grouping by name
     for (var i = 0; i < calendar.breakfast.length; i++) {
-        if (!recipes.includes(calendar.breakfast[i])) {
-            recipes.push(calendar.breakfast[i]);
+        if (recipes.findIndex(x => x.recipe === calendar.breakfast[i]) == -1) {
+            recipes.push({ "recipe": calendar.breakfast[i], "number": 1 });
+        } else {
+            index = recipes.findIndex(x => x.recipe == calendar.breakfast[i]);
+            recipes[index]["number"] = recipes[index]["number"] + 1;
         }
     }
-
     for (var j = 0; j < calendar.lunch.length; j++) {
-        if (!recipes.includes(calendar.lunch[j])) {
-            recipes.push(calendar.lunch[j]);
+        if (recipes.findIndex(x => x.recipe === calendar.lunch[i]) == -1) {
+            recipes.push({ "recipe": calendar.lunch[i], "number": 1 });
+        } else {
+            index = recipes.findIndex(x => x.recipe == calendar.lunch[i]);
+            recipes[index]["number"] = recipes[index]["number"] + 1;
         }
     }
 
     for (var k = 0; k < calendar.dinner.length; k++) {
-        if (!recipes.includes(calendar.dinner[k])) {
-            recipes.push(calendar.dinner[k]);
+        if (recipes.findIndex(x => x.recipe === calendar.dinner[i]) == -1) {
+            recipes.push({ "recipe": calendar.dinner[i], "number": 1 });
+        } else {
+            index = recipes.findIndex(x => x.recipe == calendar.dinner[i]);
+            recipes[index]["number"] = recipes[index]["number"] + 1;
+
         }
     }
+    console.log(recipes)
 
 //Form statements
     for (var l = 0; l < recipes.length; l++) {
         statements.push({
-            "statement": "MATCH (u:User)-[p:has]->(i:Ingredient)<-[r:contains]-(re:Recipe) WHERE u.name=$user and re.name=$recipe RETURN i,r.amount, p.amount, p.type",
+            "statement": "MATCH (u:User)-[p:has]->(i:Ingredient)<-[r:contains]-(re:Recipe) WHERE u.name=$user and re.name=$recipe RETURN i,toInteger(r.amount)*$number, p.amount, p.type",
             "parameters": {
                 "user": user,
-                "recipe": recipes[l],
+                "recipe": recipes[l]["recipe"],
+                "number": recipes[l]["number"]
             }
         });
     }

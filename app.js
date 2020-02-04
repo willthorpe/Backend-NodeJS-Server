@@ -187,6 +187,8 @@ app.get("/list", function (req, res) {
                 var responseData = [];
                 for (var i = 0; i < data.length; i++) {
                     //Create new array for the output combining the response
+                    console.log(data[i]['row'][1]);
+                    console.log(data[i]['row'][2]);
                     var amount = data[i]['row'][1] - data[i]['row'][2];
                     if (amount > 0) {
                         responseData.push({
