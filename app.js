@@ -97,10 +97,10 @@ app.patch("/list", function (req, res) {
 
 app.get("/ingredient", function (req, res) {
     var parameters = req.query;
+    console.log(parameters);    
     //Fetch the ingredients for the user
     fetch.fetchIngredients(parameters.user)
         .then(function (response) {
-	    console.log(response);
             var data = response.data.results[0].data;
             if (data) {
                 var responseData = [];
@@ -238,6 +238,7 @@ app.get("/search", function (req, res) {
         }).then(function (ingredientResponse) {
             return search.searchRecipe(ingredientResponse.data.results[0], recipes, JSON.parse(parameters.search), JSON.parse(parameters.diets),JSON.parse(parameters.allergies))
         }).then(function (searchResponse) {
+            console.log(searchResponse);
             if (searchResponse != null) {
                 return res.send(searchResponse);
             } else {
