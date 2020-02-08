@@ -13,6 +13,7 @@ const unlink = require("./database/unlinkRecord");
 const search = require("./database/searchRecord");
 
 const edanam = require("./apis/edanam");
+const spoontacular = require("./apis/spoontacular");
 
 app.post("/ingredient", function (req, res) {
     //Check if the user and ingredient already exists in the app
@@ -22,13 +23,14 @@ app.post("/ingredient", function (req, res) {
     match.matchIngredient(parameters)
     //Get the response from matchParameters
         .then(function (makeResponse) {
-            if (makeResponse.data.results.length == 2) {
-                user = makeResponse.data.results[0].data[0];
-                ingredient = makeResponse.data.results[1].data[0];
+            if (matchResponse.data.results[0].data.length >= 1) {
+                user = matchResponse.data.results[0].data[0].row[0];
             }
-                //Get nutritional data for ingredient
-		console.log(parameters);
-                return edanam.fetchNutritionalInfo(parameters.name, parameters.type);
+            if (matchResponse.data.results[1].data[0] >= 1) {
+                ingredient = matchResponse.data.results[1].data[0].row[0];
+            }
+            //Get nutritional data for ingredient
+            return edanam.fetchNutritionalInfo(parameters.name, parameters.type);
         }).then(function (nutritionResponse) {
         //Create the nodes and the relationships
         return create.createIngredientRelationships(user, ingredient, parameters, nutritionResponse.data);
@@ -243,7 +245,7 @@ app.get("/list", function (req, res) {
         });
 });
 
-app.patch("/recipe/", function (req, res) {
+app.patch("/recipe", function (req, res) {
     var parameters = req.body;
     //Check if the user and recipe already exists in the app
     unlink.deleteRecipe(parameters)
@@ -283,6 +285,47 @@ app.get("/search", function (req, res) {
         .catch(function (error) {
             if (error) {
                 res.send("Error when searching recipe " + error)
+            }
+        });
+});
+
+app.get("/pull", function (req, res) {
+    var parameters = req.query;
+    var formattedRecipes = [];
+    //Check if the user and recipe already exists in the app
+    spoontacular.pullRecipes(parameters.number)
+        //Get the response from matchParameters
+        .then(function (response) {
+            return spoontacular.formatRecipes(parameters.number, response.data.recipes);
+        })
+        .then(function (formatResponse) {
+            if (formatResponse !== []) {
+                formattedRecipes = formatResponse;
+                return match.matchBulk(formattedRecipes)
+                    //Get the response from matchParameters
+                    .then(function (matchResponse) {
+                        if (matchResponse.data.results[0].data || matchResponse.data.results[1].data) {
+                            //Create the nodes and the relationships
+                            return create.createRecipeRelationshipsBulk(matchResponse.data.results, formattedRecipes);
+                        } else {
+                            res.send("Error when matching recipe and user" + makeResponse.data.errors[0].code + " " + makeResponse.data.errors[0].message);
+                        }
+                    })
+                    //Get the response from createNodesandRelationships
+                    .then(function (createResponse) {
+                        if (createResponse.data.results[0].data) {
+                            return res.send("SUCCESS New recipe node created " + createResponse.data.results[0].data[0].row[0]['name']);
+                        } else {
+                            return res.send("ERROR creating recipe node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
+                        }
+                    })
+            } else {
+                res.send("Error fetching recipes");
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when fetching recipes " + error)
             }
         });
 });

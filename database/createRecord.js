@@ -16,8 +16,6 @@ function createIngredientRelationships(user, ingredient, params, nutrition) {
         });
     }
 
-    console.log(nutrition);
-
     //Create ingredient
     if (ingredient == null) {
         var ingredientParameters = {
@@ -48,6 +46,15 @@ function createIngredientRelationships(user, ingredient, params, nutrition) {
             "parameters": ingredientParameters
         });
     }
+
+    //Fix adding recipes on the admin side
+    if (params.useByDate == null) {
+        params.useByDate = ""
+    }
+    if (params.location == null) {
+        params.location = "";
+    }
+
     //Create link from user to ingredient
     statements.push({
         "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate }] -> (i) return u, i",
@@ -69,7 +76,6 @@ function createIngredientRelationships(user, ingredient, params, nutrition) {
 function createRecipeRelationships(nodes, params) {
     var user = nodes[0].data[0];
     var recipe = nodes[1].data[0];
-
     //Convert parameters to useful arrays
     var ingredients = JSON.parse(params.ingredients);
 
@@ -88,6 +94,9 @@ function createRecipeRelationships(nodes, params) {
 
     //Create recipe
     if (recipe == null) {
+        if (params.tag == null) {
+            params.tag = ""
+        }
         statements.push({
             "statement": "CREATE (n:Recipe) SET n.name=$name,n.tag=$tag,n.servings=$servings,n.prepTime=$prepTime,n.cookTime=$cookTime,n.method=$method RETURN id(n)",
             "parameters": {
@@ -128,5 +137,98 @@ function createRecipeRelationships(nodes, params) {
     });
 }
 
+//Create nodes and relationships between user and recipes
+function createRecipeRelationshipsBulk(matchedNodes, recipes) {
+    //Array of statements that will be sent in the axios request
+    var statements = [];
+    var matchedNodeCount = 1;
+    var user = matchedNodes[0].data[0];
+
+    //Create user
+    if (user == null) {
+        statements.push({
+            "statement": "CREATE (n:User) SET n.name=$name RETURN id(n)",
+            "parameters": {
+                "name": recipes[0].user,
+            }
+        });
+    }
+
+    for (var i = 0; i < recipes.length; i++) {
+        console.log(recipes[i].name);
+        var ingredients = JSON.parse(recipes[i]['ingredients']);
+        //Add ingredients if not already in database
+        for (var j = matchedNodeCount; j < (matchedNodeCount + ingredients.length - 1); j++) {
+            console.log(ingredients[j-1].name);
+            console.log(j);
+            console.log(matchedNodes[j]);
+            console.log(matchedNodes[j].data[0]);
+            if (matchedNodes[j].data.length == 0) {
+                console.log("Ingredient needs adding")
+                statements.push(
+                    {
+                    "statement": "CREATE (n:Ingredient) SET n.name=$name RETURN id(n)",
+                        "parameters": {
+                            "name":ingredients[j-1].name
+                        }
+                    },
+                    {
+                        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate }] -> (i) return u, i",
+                        "parameters": {
+                            "user": recipes[0].user,
+                            "ingredient": ingredients[j-1].name,
+                            "amount": 0,
+                            "type": ingredients[j-1].type,
+                            "useByDate": "",
+                            "location": "",
+                        }
+                    }
+                );
+            }
+        }
+
+        //Create recipe
+        statements.push({
+            "statement": "CREATE (n:Recipe) SET n.name=$name,n.tag=$tag,n.servings=$servings,n.prepTime=$prepTime,n.cookTime=$cookTime,n.method=$method RETURN id(n)",
+            "parameters": {
+                "name": recipes[i].name,
+                "tag": '',
+                "servings": recipes[i].servings,
+                "prepTime": recipes[i].prepTime,
+                "cookTime": recipes[i].cookTime,
+                "method": recipes[i].methods
+                },
+            },
+            {
+                "statement": "MATCH (u:User),(re:Recipe) WHERE u.name=$user and re.name=$recipe CREATE(u)- [r: makes] -> (re) return u, re",
+                "parameters": {
+                    "user": recipes[0].user,
+                    "recipe": recipes[i].name,
+                }
+            }
+        );
+
+        //Create links from recipe to ingredients
+        for (var k = matchedNodeCount; k < (matchedNodeCount + ingredients.length - 1); k++) {
+            statements.push({
+                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type}] -> (i) return i, re",
+                "parameters": {
+                    "ingredient": ingredients[k-1]['name'],
+                    "recipe": recipes[i].name,
+                    "amount": ingredients[k-1]['amount'],
+                    "type": ingredients[k-1]['type'],
+                }
+            });
+        }
+
+        matchedNodeCount = matchedNodeCount + ingredients.length + 1;
+    }
+
+    return axios.post(config.url, {
+        "statements": statements,
+    });
+}
+
 module.exports.createIngredientRelationships = createIngredientRelationships;
 module.exports.createRecipeRelationships = createRecipeRelationships;
+module.exports.createRecipeRelationshipsBulk = createRecipeRelationshipsBulk;

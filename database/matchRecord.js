@@ -69,7 +69,38 @@ function matchHealth (health) {
     })
 }
 
+//Match bulk recipes
+function matchBulk(recipes) {
+    var statements = [
+        {
+            "statement": "MATCH (n:User) WHERE n.name=$name RETURN id(n)",
+            "parameters": {
+                "name": recipes[0].user,
+            }
+        }
+    ];
+
+    for (var i = 0; i < recipes.length; i++) {
+        var ingredients = JSON.parse(recipes[i]['ingredients']);
+        for (var j = 0; j < ingredients.length; j++) {
+            statements.push(
+                {
+                    "statement": "MATCH (n:Ingredient) WHERE n.name=$name RETURN id(n)",
+                    "parameters": {
+                        "name": ingredients[j].name,
+                    }
+                }
+            );
+        }
+    }
+
+    return axios.post(config.url, {
+        "statements": statements,
+    })
+}
+
 module.exports.matchIngredient = matchIngredient;
 module.exports.matchRecipe = matchRecipe;
 module.exports.matchDiet = matchDiet;
 module.exports.matchHealth = matchHealth;
+module.exports.matchBulk = matchBulk;
