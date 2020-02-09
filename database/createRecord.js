@@ -1,5 +1,6 @@
 const axios = require('axios').default;
 const config = require("../config");
+const edanam = require("../apis/edanam");
 
 //Create nodes and relationships between user and ingredients
 function createIngredientRelationships(user, ingredient, params, nutrition) {
@@ -138,7 +139,7 @@ function createRecipeRelationships(nodes, params) {
 }
 
 //Create nodes and relationships between user and recipes
-function createRecipeRelationshipsBulk(matchedNodes, recipes) {
+async function createRecipeRelationshipsBulk(matchedNodes, recipes) {
     //Array of statements that will be sent in the axios request
     var statements = [];
     var matchedNodeCount = 1;
@@ -153,24 +154,18 @@ function createRecipeRelationshipsBulk(matchedNodes, recipes) {
             }
         });
     }
-
     for (var i = 0; i < recipes.length; i++) {
-        console.log(recipes[i].name);
         var ingredients = JSON.parse(recipes[i]['ingredients']);
         //Add ingredients if not already in database
         for (var j = matchedNodeCount; j < (matchedNodeCount + ingredients.length - 1); j++) {
-            console.log(ingredients[j-1].name);
-            console.log(j);
-            console.log(matchedNodes[j]);
-            console.log(matchedNodes[j].data[0]);
             if (matchedNodes[j].data.length == 0) {
-                console.log("Ingredient needs adding")
+                //Fetch Nutrition
+                var ingredientParameters = await fetchNutrition(ingredients[j - 1].name, ingredients[j - 1].type);
+                //Add to database
                 statements.push(
                     {
-                    "statement": "CREATE (n:Ingredient) SET n.name=$name RETURN id(n)",
-                        "parameters": {
-                            "name":ingredients[j-1].name
-                        }
+                        "statement": "CREATE (n:Ingredient) SET n.name=$name, n.calories=$calories, n.weight=$weight,n.energy=$energy,n.fat=$fat,n.carbs=$carbs,n.protein=$protein, n.dietLabels=$dietLabels,n.healthLabels=$healthLabels RETURN id(n)",
+                        "parameters": ingredientParameters
                     },
                     {
                         "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate }] -> (i) return u, i",
@@ -186,7 +181,6 @@ function createRecipeRelationshipsBulk(matchedNodes, recipes) {
                 );
             }
         }
-
         //Create recipe
         statements.push({
             "statement": "CREATE (n:Recipe) SET n.name=$name,n.tag=$tag,n.servings=$servings,n.prepTime=$prepTime,n.cookTime=$cookTime,n.method=$method RETURN id(n)",
@@ -221,12 +215,44 @@ function createRecipeRelationshipsBulk(matchedNodes, recipes) {
             });
         }
 
-        matchedNodeCount = matchedNodeCount + ingredients.length + 1;
+        matchedNodeCount = matchedNodeCount + ingredients.length;
     }
-
     return axios.post(config.url, {
         "statements": statements,
     });
+}
+
+async function fetchNutrition(ingredient, type) {
+    var nutrition = await edanam.fetchNutritionalInfo(ingredient, type);
+    nutrition = nutrition.data;
+    var ingredientParameters = {
+        "name": ingredient,
+        "calories": nutrition.calories,
+        "weight": nutrition.totalWeight,
+        "dietLabels": nutrition.dietLabels.toString(),
+        "healthLabels": nutrition.healthLabels.toString()
+    };
+
+    //Nutrition data
+    ingredientParameters["energy"] = 0;
+    ingredientParameters["fat"] = 0;
+    ingredientParameters["carbs"] = 0;
+    ingredientParameters["protein"] = 0;
+
+    if (nutrition.totalNutrients.ENERC_KCAL) {
+        ingredientParameters["energy"] = nutrition.totalNutrients.ENERC_KCAL.quantity;
+    }
+    if (nutrition.totalNutrients.FAT) {
+        ingredientParameters["fat"] = nutrition.totalNutrients.FAT.quantity;
+    }
+    if (nutrition.totalNutrients.CHOCDF) {
+        ingredientParameters["carbs"] = nutrition.totalNutrients.CHOCDF.quantity;
+    }
+    if (nutrition.totalNutrients.PROCNT) {
+        ingredientParameters["protein"] = nutrition.totalNutrients.PROCNT.quantity;
+    }
+
+    return ingredientParameters;
 }
 
 module.exports.createIngredientRelationships = createIngredientRelationships;
