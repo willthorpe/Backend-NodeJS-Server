@@ -5,43 +5,24 @@ var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-const match = require("./database/matchRecord");
 const create = require("./database/createRecord");
 const fetch = require("./database/fetchRecord");
 const update = require("./database/updateRecord");
 const unlink = require("./database/unlinkRecord");
 const search = require("./database/searchRecord");
 
-const edanam = require("./apis/edanam");
 const spoontacular = require("./apis/spoontacular");
 
 app.post("/ingredient", function (req, res) {
-    //Check if the user and ingredient already exists in the app
-    var user = null;
-    var ingredient = null;
     var parameters = req.body;
-    match.matchIngredient(parameters)
-    //Get the response from matchParameters
-        .then(function (makeResponse) {
-            if (matchResponse.data.results[0].data.length >= 1) {
-                user = matchResponse.data.results[0].data[0].row[0];
-            }
-            if (matchResponse.data.results[1].data[0] >= 1) {
-                ingredient = matchResponse.data.results[1].data[0].row[0];
-            }
-            //Get nutritional data for ingredient
-            return edanam.fetchNutritionalInfo(parameters.name, parameters.type);
-        }).then(function (nutritionResponse) {
-        //Create the nodes and the relationships
-        return create.createIngredientRelationships(user, ingredient, parameters, nutritionResponse.data);
-    })
+    create.createIngredientRelationships(parameters)
     //Get the response from createNodesandRelationships
-        .then(function (createResponse) {
-            if (createResponse.data.results[0].data) {
-                console.log(createResponse.data.errors[0]);
-                return res.send("SUCCESS New ingredient node created " + createResponse.data.results[0].data[0].row[0]['name']);
+        .then(function (response) {
+            if (response.data.results[0].data) {
+                console.log(response.data.errors[0]);
+                return res.send("SUCCESS New ingredient node created " + response.data.results[0].data[0].row[0]['name']);
             } else {
-                return res.send("ERROR creating ingredient node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
+                return res.send("ERROR creating ingredient node " + response.data.errors[0].code + " " + response.data.errors[0].message);
             }
         })
         .catch(function (error) {
@@ -54,22 +35,13 @@ app.post("/ingredient", function (req, res) {
 app.post("/recipe", function (req, res) {
     var parameters = req.body;
     //Check if the user and recipe already exists in the app
-    match.matchRecipe(parameters)
-    //Get the response from matchParameters
-        .then(function (makeResponse) {
-            if (makeResponse.data.results[0].data || makeResponse.data.results[1].data) {
-                //Create the nodes and the relationships
-                return create.createRecipeRelationships(makeResponse.data.results, parameters);
-            } else {
-                res.send("Error when matching recipe and user" + makeResponse.data.errors[0].code + " " + makeResponse.data.errors[0].message);
-            }
-        })
+    create.createRecipeRelationships(parameters)
         //Get the response from createNodesandRelationships
-        .then(function (createResponse) {
-            if (createResponse.data.results[0].data) {
-                return res.send("SUCCESS New recipe node created " + createResponse.data.results[0].data[0].row[0]['name']);
+        .then(function (response) {
+            if (response.data.results[0].data) {
+                return res.send("SUCCESS New recipe node created " + response.data.results[0].data[0].row[0]['name']);
             } else {
-                return res.send("ERROR creating recipe node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
+                return res.send("ERROR creating recipe node " + response.data.errors[0].code + " " + response.data.errors[0].message);
             }
         })
         .catch(function (error) {
@@ -115,7 +87,6 @@ app.get("/ingredient", function (req, res) {
                         'location': data[i]['row'][1]['location'],
                         'useByDate': data[i]['row'][1]['useByDate']
                     });
-		    console.log(responseData);
                 }
                 return res.send(responseData);
             } else {
@@ -166,7 +137,6 @@ app.get("/recipe", function (req, res) {
     //Fetch the recipes for the user
     var responseData = [];
     var parameters = req.query;
-
     fetch.fetchRecipes(parameters.user)
         .then(function (response) {
             var data = response.data.results[0].data;
@@ -222,8 +192,6 @@ app.get("/list", function (req, res) {
                 var responseData = [];
                 for (var i = 0; i < data.length; i++) {
                     //Create new array for the output combining the response
-                    console.log(data[i]['row'][1]);
-                    console.log(data[i]['row'][2]);
                     var amount = data[i]['row'][1] - data[i]['row'][2];
                     if (amount > 0) {
                         responseData.push({
@@ -275,7 +243,6 @@ app.get("/search", function (req, res) {
         }).then(function (ingredientResponse) {
             return search.searchRecipe(ingredientResponse.data.results[0], recipes, JSON.parse(parameters.search), JSON.parse(parameters.diets),JSON.parse(parameters.allergies))
         }).then(function (searchResponse) {
-            console.log(searchResponse);
             if (searchResponse != null) {
                 return res.send(searchResponse);
             } else {
@@ -301,22 +268,13 @@ app.get("/pull", function (req, res) {
         .then(function (formatResponse) {
             if (formatResponse !== []) {
                 formattedRecipes = formatResponse;
-                return match.matchBulk(formattedRecipes)
-                    //Get the response from matchParameters
-                    .then(function (matchResponse) {
-                        if (matchResponse.data.results[0].data || matchResponse.data.results[1].data) {
-                            //Create the nodes and the relationships
-                            return create.createRecipeRelationshipsBulk(matchResponse.data.results, formattedRecipes);
-                        } else {
-                            res.send("Error when matching recipe and user" + makeResponse.data.errors[0].code + " " + makeResponse.data.errors[0].message);
-                        }
-                    })
+                return create.createRecipeRelationshipsBulk(formattedRecipes)
                     //Get the response from createNodesandRelationships
-                    .then(function (createResponse) {
-                        if (createResponse.data.results[0].data) {
-                            return res.send("SUCCESS New recipe node created " + createResponse.data.results[0].data[0].row[0]['name']);
+                    .then(function (response) {
+                        if (response.data.results[0].data) {
+                            return res.send("SUCCESS New recipe node created " + response.data.results[0].data[0].row[0]['name']);
                         } else {
-                            return res.send("ERROR creating recipe node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
+                            return res.send("ERROR creating recipe node " + response.data.errors[0].code + " " + createResponse.data.errors[0].message);
                         }
                     })
             } else {
