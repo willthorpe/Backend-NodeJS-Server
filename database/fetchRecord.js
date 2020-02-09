@@ -50,6 +50,9 @@ function fetchAllRecipes() {
             {
                 "statement": "MATCH (re:Recipe)-[r:contains]-> (i:Ingredient) RETURN distinct re,collect([i,r])"
             },
+            {
+                "statement": "MATCH (u:User)-[r:makes]->(re:Recipe) RETURN count(r)"
+            },
         ],
     })
 }

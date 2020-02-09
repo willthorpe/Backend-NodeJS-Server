@@ -90,7 +90,7 @@ async function createRecipeRelationships(params) {
                 "parameters": {
                     "ingredient": ingredients[i]['name'],
                     "recipe": params.name,
-                    "amount": ingredients[i]['amount'],
+                    "amount": parseInt(ingredients[i]['amount']),
                     "type": ingredients[i]['type'],
                     "weight": ingredientParameters[k].weight,
                     "calories": ingredientParameters[k].calories,
@@ -128,7 +128,7 @@ async function createRecipeRelationshipsBulk(recipes) {
             ingredientParametersList.push(ingredientParameters);
             statements.push(
                 {
-                "statement": "MERGE (n:Ingredient {name:$name, dietLabel:$dietLabels,healthLabels:$healthLabels}) RETURN n",
+                "statement": "MERGE (n:Ingredient {name:$name, dietLabels:$dietLabels,healthLabels:$healthLabels}) RETURN n",
                     "parameters": {
                         'name': ingredients[j]["name"],
                         'dietLabels': ingredientParameters.dietLabels,
@@ -166,7 +166,7 @@ async function createRecipeRelationshipsBulk(recipes) {
                 "parameters": {
                     "ingredient": ingredients[k]['name'],
                     "recipe": recipes[i].name,
-                    "amount": ingredients[k]['amount'],
+                    "amount": parseInt(ingredients[k]['amount']),
                     "type": ingredients[k]['type'],
                     "weight": ingredientParametersList[k].weight,
                     "calories": ingredientParametersList[k].calories,

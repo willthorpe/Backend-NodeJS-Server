@@ -22,7 +22,6 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
     for (var j = 0; j < searchParameters.length; j++) {
         searchParameters[j] = searchParameters[j] / total * 100
     }
-    console.log(searchParameters);
     for (var k = 0; k < recipes[0].data.length; k++) {
         var score = 0;
         var totalRecipeWeight = 0;    
@@ -35,12 +34,12 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
              * Exclude ingredients that don't meet allergy concerns
             */
             var ingredientAllergies = recipes[0].data[k].row[1][l][0].healthLabels.split(",");
-	    for (var a = 0; a < allergies.length; a++) {
+	        for (var a = 0; a < allergies.length; a++) {
                 if (allergies[a].value == 1 && !ingredientAllergies.includes(allergies[a].name)) {
                     meetsAllergies = false
                 }
             }
-            var weightOne = parseFloat(recipes[0].data[k].row[1][l][0].weight / 100);
+            var weightOne = parseFloat(recipes[0].data[k].row[1][l][1].weight / 100);
             totalRecipeWeight = totalRecipeWeight + (parseInt(recipes[0].data[k].row[1][l][1].amount * weightOne));
         }
         if (meetsAllergies == false) {
@@ -48,11 +47,10 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
             continue;
         }
 
-        console.log(totalRecipeWeight);
         for (var m = 0; m < recipes[0].data[k].row[1].length; m++) {
             //Check Prefer Lighter Weight - 1
             console.log("Lighter Weight");
-            var weightOne = parseFloat(recipes[0].data[k].row[1][m][0].weight / 100);
+            var weightOne = parseFloat(recipes[0].data[k].row[1][m][1].weight / 100);
             if (weightOne <= 300) {
                 score = score + (searchParameters[1] * ((recipes[0].data[k].row[1][m][1].amount * weightOne) / totalRecipeWeight));
                 console.log(score);
@@ -70,26 +68,37 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
                 score = score + (searchParameters[7] * ((recipes[0].data[k].row[1][m][1].amount * weightOne) / totalRecipeWeight));
                 console.log(score)
             }
+            var varietyIngredient = true;
             for (var n = 0; n < userIngredients.data.length; n++) {
-                var weightOne = parseFloat(recipes[0].data[k].row[1][m][0].weight / 100);
+                var weightOne = parseFloat(recipes[0].data[k].row[1][m][1].weight / 100);
                 //Check Prefer Owned Ingredients - 0
 		        console.log("Prefer Owned Ingredients");
                 if (recipes[0].data[k].row[1][m][0].name == userIngredients.data[n].row[0].name && userIngredients.data[n].row[0].amount >= recipes[0].data[k].row[1][m][1].amount) {
                     console.log("Owned Ingredient");
                     score = score + (searchParameters[0] * ((recipes[0].data[k].row[1][m][1].amount * weightOne) / totalRecipeWeight));
                     console.log(score);
-                }
+                } else if (recipes[0].data[k].row[1][m][0].name == userIngredients.data[n].row[0].name)
+                    //Check Prefer Variety - 2
+                    varietyIngredient = false;
+            } 
+            console.log("Variety Ingredient");
+            if (varietyIngredient == true) {
+                score = score + (searchParameters[2] * ((recipes[0].data[k].row[1][m][1].amount * weightOne) / totalRecipeWeight));
+                console.log(score);
             }
-           
         }
 
-        //Check Prefer Variety - 2
-
         //Check Popular Recipes - 3
+        console.log("Popular Recipes");
+        var popularity = recipes[1].data[0].row[0];
+        if (popularity <= 20) {
+            score = score + (popularity / 20 * searchParameters[3]);
+            console.log(score);
+        }
 
         //Check Prefer Less Ingredients - 4
         console.log("Less ingredients");
-        ingredients = recipes[0].data[k].row[1].length;
+        var ingredients = recipes[0].data[k].row[1].length;
         if (ingredients <= 10) {
             score = score + (ingredients/10 * searchParameters[4]);
             console.log(score);
@@ -97,7 +106,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
 
         //Check Prefer Less Complex Recipes - 5
         console.log("Less complex recipes");
-        method = JSON.parse(recipes[0].data[k].row[0].method).length;
+        var method = JSON.parse(recipes[0].data[k].row[0].method).length;
         if (method <= 10) {
             score = score + (method/10 * searchParameters[5]);
             console.log(score);
@@ -105,7 +114,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
 
         //Check Prefer Shorter Recipes - 6
         console.log("Shorter Recipes");
-        time = parseInt(recipes[0].data[k].row[0].cookTime) + parseInt(recipes[0].data[k].row[0].prepTime)
+        var time = parseInt(recipes[0].data[k].row[0].cookTime) + parseInt(recipes[0].data[k].row[0].prepTime)
         if (time <= 60) {
             score = score + (time/60 * searchParameters[6]);
             console.log(score);
