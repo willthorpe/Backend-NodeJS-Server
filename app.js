@@ -120,7 +120,13 @@ app.get("/nextRecipe", function (req, res) {
                     {
                         'name': response.data.results[0].data[i]['row'][2]['name'],
                         'amount': response.data.results[0].data[i]['row'][1]['amount'],
-                        'type': response.data.results[0].data[i]['row'][1]['type']
+                        'type': response.data.results[0].data[i]['row'][1]['type'],
+                        'weight': response.data.results[0].data[i]['row'][1]['weight'],
+                        'calories': response.data.results[0].data[i]['row'][1]['calories'],
+                        'energy': response.data.results[0].data[i]['row'][1]['energy'],
+                        'fat': response.data.results[0].data[i]['row'][1]['fat'],
+                        'carbs': response.data.results[0].data[i]['row'][1]['carbs'],
+                        'protein': response.data.results[0].data[i]['row'][1]['protein']
                     }
                 );
             }
@@ -163,7 +169,13 @@ app.get("/recipe", function (req, res) {
                                 responseData[index]['ingredients'].push({
                                     'name': data[i]['row'][1]['name'],
                                     'amount': data[i]['row'][2]['amount'],
-                                    'type': data[i]['row'][2]['type']
+                                    'type': data[i]['row'][2]['type'],
+                                    "weight": data[i]['row'][2]['weight'],
+                                    "calories": data[i]['row'][2]['calories'],
+                                    "energy": data[i]['row'][2]['energy'],
+                                    "fat": data[i]['row'][2]['fat'],
+                                    "carbs": data[i]['row'][2]['carbs'],
+                                    "protein": data[i]['row'][2]['protein'],
                                 })
                             }
                             return res.send(responseData);

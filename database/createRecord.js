@@ -16,15 +16,19 @@ async function createIngredientRelationships(params) {
     });
 
     //Create ingredient
-    var ingredientParameters = await fetchNutrition(params.name, params.amount);
+    var ingredientParameters = await fetchNutrition(params.name, params.amount, params.type);
     statements.push({
-        "statement": "MERGE (n:Ingredient {name:$name,calories:$calories,weight:$weight,energy:$energy,fat:$fat,carbs:$carbs,protein:$protein,dietLabel:$dietLabels,healthLabels:$healthLabels}) RETURN n",
-        "parameters": ingredientParameters
+        "statement": "MERGE (n:Ingredient {name:$name, dietLabel:$dietLabels,healthLabels:$healthLabels}) RETURN n",
+        "parameters": {
+            'name': params.name,
+            'dietLabels': ingredientParameters.dietLabels,
+            'healthLabels': ingredientParameters.healthLabels
+        }
     });
-    console.log(statements);
+
     //Create link from user to ingredient
     statements.push({
-        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate }] -> (i) return u, i",
+        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate}] -> (i) return u, i",
         "parameters": {
             "user": params.user,
             "ingredient": params.name,
@@ -40,7 +44,7 @@ async function createIngredientRelationships(params) {
 }
 
 //Create nodes and relationships between user and recipes
-function createRecipeRelationships(params) {
+async function createRecipeRelationships(params) {
     //Convert parameters to useful arrays
     var ingredients = JSON.parse(params.ingredients);
 
@@ -80,13 +84,20 @@ function createRecipeRelationships(params) {
     //Create links from recipe to ingredients
     for (var i = 0; i < ingredients.length; i++) {
         if (ingredients[i] != null) {
+            var ingredientParameters = await fetchNutrition(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["type"]);
             statements.push({
-                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type}] -> (i) return i, re",
+                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein}] -> (i) return i, re",
                 "parameters": {
                     "ingredient": ingredients[i]['name'],
                     "recipe": params.name,
                     "amount": ingredients[i]['amount'],
                     "type": ingredients[i]['type'],
+                    "weight": ingredientParameters[k].weight,
+                    "calories": ingredientParameters[k].calories,
+                    "energy": ingredientParameters[k].energy,
+                    "fat": ingredientParameters[k].fat,
+                    "carbs": ingredientParameters[k].carbs,
+                    "protein": ingredientParameters[k].protein
                 }
             });
         }
@@ -110,14 +121,19 @@ async function createRecipeRelationshipsBulk(recipes) {
     });
     for (var i = 0; i < recipes.length; i++) {
         var ingredients = JSON.parse(recipes[i]['ingredients']);
+        var ingredientParametersList = [];
         //Add ingredients if not already in database
         for (var j = 0; j < ingredients.length; j++) {
-            var ingredientParameters = await fetchNutrition(ingredients[j].name, ingredients[j].amount);
-
+            var ingredientParameters = await fetchNutrition(ingredients[j].name, ingredients[j].amount, ingredients[j].type);
+            ingredientParametersList.push(ingredientParameters);
             statements.push(
                 {
-                    "statement": "MERGE (n:Ingredient {name:$name, calories:$calories, weight:$weight,energy:$energy,fat:$fat,carbs:$carbs,protein:$protein, dietLabels:$dietLabels,healthLabels:$healthLabels}) RETURN n",
-                    "parameters": ingredientParameters
+                "statement": "MERGE (n:Ingredient {name:$name, dietLabel:$dietLabels,healthLabels:$healthLabels}) RETURN n",
+                    "parameters": {
+                        'name': ingredients[j]["name"],
+                        'dietLabels': ingredientParameters.dietLabels,
+                        'healthLabels': ingredientParameters.healthLabels
+                    }
                 },
             );
         }
@@ -131,7 +147,7 @@ async function createRecipeRelationshipsBulk(recipes) {
                 "servings": recipes[i].servings,
                 "prepTime": recipes[i].prepTime,
                 "cookTime": recipes[i].cookTime,
-                "method": recipes[i].methods
+                "method": recipes[i].methods,
                 },
             },
             {
@@ -146,12 +162,18 @@ async function createRecipeRelationshipsBulk(recipes) {
         //Create links from recipe to ingredients
         for (var k = 0; k < ingredients.length; k++) {
             statements.push({
-                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type}] -> (i) return i, re",
+                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein}] -> (i) return i, re",
                 "parameters": {
                     "ingredient": ingredients[k]['name'],
                     "recipe": recipes[i].name,
                     "amount": ingredients[k]['amount'],
                     "type": ingredients[k]['type'],
+                    "weight": ingredientParametersList[k].weight,
+                    "calories": ingredientParametersList[k].calories,
+                    "energy": ingredientParametersList[k].energy,
+                    "fat": ingredientParametersList[k].fat,
+                    "carbs": ingredientParametersList[k].carbs,
+                    "protein": ingredientParametersList[k].protein
                 }
             });
         }
@@ -162,8 +184,8 @@ async function createRecipeRelationshipsBulk(recipes) {
     });
 }
 
-async function fetchNutrition(ingredient, type) {
-    var nutrition = await edanam.fetchNutritionalInfo(ingredient, type);
+async function fetchNutrition(ingredient, amount, type) {
+    var nutrition = await edanam.fetchNutritionalInfo(ingredient, amount, type);
     nutrition = nutrition.data;
     var ingredientParameters = {
         "name": ingredient,
