@@ -220,3 +220,4 @@ async function fetchNutrition(ingredient, amount, type) {
 module.exports.createIngredientRelationships = createIngredientRelationships;
 module.exports.createRecipeRelationships = createRecipeRelationships;
 module.exports.createRecipeRelationshipsBulk = createRecipeRelationshipsBulk;
+module.exports.fetchNutrition = fetchNutrition;
