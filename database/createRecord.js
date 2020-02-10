@@ -92,12 +92,12 @@ async function createRecipeRelationships(params) {
                     "recipe": params.name,
                     "amount": parseInt(ingredients[i]['amount']),
                     "type": ingredients[i]['type'],
-                    "weight": ingredientParameters[k].weight,
-                    "calories": ingredientParameters[k].calories,
-                    "energy": ingredientParameters[k].energy,
-                    "fat": ingredientParameters[k].fat,
-                    "carbs": ingredientParameters[k].carbs,
-                    "protein": ingredientParameters[k].protein
+                    "weight": ingredientParameters.weight,
+                    "calories": ingredientParameters.calories,
+                    "energy": ingredientParameters.energy,
+                    "fat": ingredientParameters.fat,
+                    "carbs": ingredientParameters.carbs,
+                    "protein": ingredientParameters.protein
                 }
             });
         }

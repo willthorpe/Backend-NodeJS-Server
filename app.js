@@ -19,8 +19,7 @@ app.post("/ingredient", function (req, res) {
     //Get the response from createNodesandRelationships
         .then(function (response) {
             if (response.data.results[0].data) {
-                console.log(response.data.errors[0]);
-                return res.send("SUCCESS New ingredient node created " + response.data.results[0].data[0].row[0]['name']);
+                return res.send("SUCCESS New ingredient node created for " + response.data.results[0].data[0].row[0]['name'] + " which is " + response.data.results[1].data[0].row[0]['name']);
             } else {
                 return res.send("ERROR creating ingredient node " + response.data.errors[0].code + " " + response.data.errors[0].message);
             }
@@ -39,7 +38,7 @@ app.post("/recipe", function (req, res) {
         //Get the response from createNodesandRelationships
         .then(function (response) {
             if (response.data.results[0].data) {
-                return res.send("SUCCESS New recipe node created " + response.data.results[0].data[0].row[0]['name']);
+                return res.send("SUCCESS New recipe node created for " + response.data.results[0].data[0].row[0]['name'] + " which is " + response.data.results[1].data[0].row[0]['name']);
             } else {
                 return res.send("ERROR creating recipe node " + response.data.errors[0].code + " " + response.data.errors[0].message);
             }
