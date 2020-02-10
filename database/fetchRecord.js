@@ -29,20 +29,6 @@ function fetchRecipe(recipe) {
     })
 }
 
-//Fetch all the recipes related to the user. 
-function fetchRecipes(user) {
-    return axios.post(config.url, {
-        "statements": [
-            {
-                "statement": "MATCH (u:User)-[r:makes]->(re:Recipe) WHERE u.name=$user RETURN re",
-                "parameters": {
-                    "user": user,
-                }
-            },
-        ],
-    })
-}
-
 //Fetch all the recipes
 function fetchAllRecipes() {
     return axios.post(config.url, {
@@ -58,11 +44,11 @@ function fetchAllRecipes() {
 }
 
 //Fetch all the recipes related to the user. 
-function fetchRecipeIngredients(user) {
+function fetchRecipes(user) {
     return axios.post(config.url, {
         "statements": [
             {
-                "statement": "MATCH (u:User)-[p:makes]->(re:Recipe)-[r:contains]->(i:Ingredient) WHERE u.name=$user RETURN re,i,r",
+                "statement": "MATCH (u:User)-[p:makes]->(re:Recipe)-[r:contains]->(i:Ingredient) WHERE u.name=$user RETURN distinct re,collect([i,r])",
                 "parameters": {
                     "user": user,
                 }
@@ -128,7 +114,6 @@ module.exports.fetchIngredients = fetchIngredients;
 module.exports.fetchRecipe = fetchRecipe;
 module.exports.fetchRecipes = fetchRecipes;
 module.exports.fetchAllRecipes = fetchAllRecipes;
-module.exports.fetchRecipeIngredients = fetchRecipeIngredients;
 module.exports.fetchShoppingList = fetchShoppingList;
 
 

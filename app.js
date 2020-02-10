@@ -158,33 +158,26 @@ app.get("/recipe", function (req, res) {
                         'method': JSON.parse(data[i]['row'][0]['method']),
                         'ingredients': [],
                     });
+                    var ingredients = data[i]['row'][1];
+                    for (var j = 0; j < ingredients.length; j++) {
+                        var index = responseData.findIndex(x => x.name === data[i]['row'][0]['name'])
+                        //Push ingredients to the output array
+                        responseData[index]['ingredients'].push({
+                            'name': ingredients[j][0]['name'],
+                            'amount': ingredients[j][1]['amount'],
+                            'type': ingredients[j][1]['type'],
+                            "weight": ingredients[j][1]['weight'],
+                            "calories": ingredients[j][1]['calories'],
+                            "energy": ingredients[j][1]['energy'],
+                            "fat": ingredients[j][1]['fat'],
+                            "carbs": ingredients[j][1]['carbs'],
+                            "protein": ingredients[j][1]['protein'],
+                        })
+                    }
                 }
-                return fetch.fetchRecipeIngredients(parameters.user)
-                    .then(function (ingredientResponse) {
-                        var data = ingredientResponse.data.results[0].data;
-                        if (data) {
-                            for (var i = 0; i < data.length; i++) {
-                                var index = responseData.findIndex(x => x.name === data[i]['row'][0]['name'])
-                                //Push ingredients to the output array
-                                responseData[index]['ingredients'].push({
-                                    'name': data[i]['row'][1]['name'],
-                                    'amount': data[i]['row'][2]['amount'],
-                                    'type': data[i]['row'][2]['type'],
-                                    "weight": data[i]['row'][2]['weight'],
-                                    "calories": data[i]['row'][2]['calories'],
-                                    "energy": data[i]['row'][2]['energy'],
-                                    "fat": data[i]['row'][2]['fat'],
-                                    "carbs": data[i]['row'][2]['carbs'],
-                                    "protein": data[i]['row'][2]['protein'],
-                                })
-                            }
-                            return res.send(responseData);
-                        } else {
-                            return res.send("ERROR when fetching recipe node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
-                        }
-                    });
+                res.send(responseData);
             } else {
-                return res.send("ERROR when fetching recipe node " + createResponse.data.errors[0].code + " " + createResponse.data.errors[0].message);
+                return res.send("ERROR when fetching recipe node " + response.data.errors[0].code + " " + response.data.errors[0].message);
             }
         })
         .catch(function (error) {
