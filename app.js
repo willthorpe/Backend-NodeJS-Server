@@ -18,8 +18,10 @@ app.post("/ingredient", function (req, res) {
     create.createIngredientRelationships(parameters)
     //Get the response from createNodesandRelationships
         .then(function (response) {
-            if (response.data.results[0].data) {
-                return res.send("SUCCESS New ingredient node created for " + response.data.results[0].data[0].row[0]['name'] + " which is " + response.data.results[1].data[0].row[0]['name']);
+            var userResponse = response.data.results[0].data;
+            var ingredientResponse = response.data.results[1].data;
+            if (userResponse && ingredientResponse) {
+                return res.send("SUCCESS New ingredient node created for " + userResponse[0].row[0]['name'] + " which is " + ingredientResponse[0].row[0]['name']);
             } else {
                 return res.send("ERROR creating ingredient node " + response.data.errors[0].code + " " + response.data.errors[0].message);
             }
@@ -37,8 +39,10 @@ app.post("/recipe", function (req, res) {
     create.createRecipeRelationships(parameters)
         //Get the response from createNodesandRelationships
         .then(function (response) {
-            if (response.data.results[0].data) {
-                return res.send("SUCCESS New recipe node created for " + response.data.results[0].data[0].row[0]['name'] + " which is " + response.data.results[1].data[0].row[0]['name']);
+            var userResponse = response.data.results[0].data;
+            var recipeResponse = response.data.results[1].data;
+            if (userResponse && recipeResponse) {
+                return res.send("SUCCESS New recipe node created for " + userResponse[0].row[0]['name'] + " which is " + recipeResponse[0].row[0]['name']);
             } else {
                 return res.send("ERROR creating recipe node " + response.data.errors[0].code + " " + response.data.errors[0].message);
             }
@@ -53,10 +57,10 @@ app.post("/recipe", function (req, res) {
 app.patch("/list", function (req, res) {
     var parameters = req.body;
     update.updateShoppingList(parameters)
-    //Get the response from matchParameters
+    //Update the shopping list with bought amounts
         .then(function (response) {
             if (response.data.results[0].data || response.data.results[1].data) {
-                return res.send("SUCCESS Shopping list updated " + response.data.results[0].data[0].row[0]['name']);
+                return res.send("SUCCESS Shopping list updated for " + response.data.results[0].data[0].row[0]['name']);
             } else {
                 res.send("Error when updating shopping list" + response.data.errors[0].code + " " + response.data.errors[0].message);
             }
@@ -69,8 +73,7 @@ app.patch("/list", function (req, res) {
 });
 
 app.get("/ingredient", function (req, res) {
-    var parameters = req.query;
-    console.log(parameters);    
+    var parameters = req.query;  
     //Fetch the ingredients for the user
     fetch.fetchIngredients(parameters.user)
         .then(function (response) {
@@ -104,28 +107,30 @@ app.get("/nextRecipe", function (req, res) {
 
     fetch.fetchRecipe(parameters.recipe)
         .then(function (response) {
+            var recipeResponse = response.data.results[0].data[0]['row'][0]
             var responseData = {
-                'name': response.data.results[0].data[0]['row'][0]['name'],
-                'tag': response.data.results[0].data[0]['row'][0]['tag'],
-                'servings': response.data.results[0].data[0]['row'][0]['servings'],
-                'prepTime': response.data.results[0].data[0]['row'][0]['prepTime'],
-                'cookTime': response.data.results[0].data[0]['row'][0]['cookTime'],
-                'method': JSON.parse(response.data.results[0].data[0]['row'][0]['method']),
+                'name': recipeResponse['name'],
+                'tag': recipeResponse['tag'],
+                'servings': recipeResponse['servings'],
+                'prepTime': recipeResponse['prepTime'],
+                'cookTime': recipeResponse['cookTime'],
+                'method': JSON.parse(recipeResponse['method']),
                 'ingredients': [],
             };
 
             for (var i = 0; i < response.data.results[0].data.length; i++) {
+                var ingredientResponse = response.data.results[0].data[i]['row'];
                 responseData.ingredients.push(
                     {
-                        'name': response.data.results[0].data[i]['row'][2]['name'],
-                        'amount': response.data.results[0].data[i]['row'][1]['amount'],
-                        'type': response.data.results[0].data[i]['row'][1]['type'],
-                        'weight': response.data.results[0].data[i]['row'][1]['weight'],
-                        'calories': response.data.results[0].data[i]['row'][1]['calories'],
-                        'energy': response.data.results[0].data[i]['row'][1]['energy'],
-                        'fat': response.data.results[0].data[i]['row'][1]['fat'],
-                        'carbs': response.data.results[0].data[i]['row'][1]['carbs'],
-                        'protein': response.data.results[0].data[i]['row'][1]['protein']
+                        'name': ingredientResponse[2]['name'],
+                        'amount': ingredientResponse[1]['amount'],
+                        'type': ingredientResponse[1]['type'],
+                        'weight': ingredientResponse[1]['weight'],
+                        'calories': ingredientResponse[1]['calories'],
+                        'energy': ingredientResponse[1]['energy'],
+                        'fat': ingredientResponse[1]['fat'],
+                        'carbs': ingredientResponse[1]['carbs'],
+                        'protein': ingredientResponse[1]['protein']
                     }
                 );
             }
@@ -148,13 +153,14 @@ app.get("/recipe", function (req, res) {
             if (data) {
                 for (var i = 0; i < data.length; i++) {
                     //Create new array for the output combining the recipe responses
+                    var recipeResponse = data[i]['row'][0];
                     responseData.push({
-                        'name': data[i]['row'][0]['name'],
-                        'tag': data[i]['row'][0]['tag'],
-                        'servings': data[i]['row'][0]['servings'],
-                        'prepTime': data[i]['row'][0]['prepTime'],
-                        'cookTime': data[i]['row'][0]['cookTime'],
-                        'method': JSON.parse(data[i]['row'][0]['method']),
+                        'name': recipeResponse['name'],
+                        'tag': recipeResponse['tag'],
+                        'servings': recipeResponse['servings'],
+                        'prepTime': recipeResponse['prepTime'],
+                        'cookTime': recipeResponse['cookTime'],
+                        'method': JSON.parse(recipeResponse['method']),
                         'ingredients': [],
                     });
                     var ingredients = data[i]['row'][1];
@@ -174,7 +180,7 @@ app.get("/recipe", function (req, res) {
                         })
                     }
                 }
-                res.send(responseData);
+                return res.send(responseData);
             } else {
                 return res.send("ERROR when fetching recipe node " + response.data.errors[0].code + " " + response.data.errors[0].message);
             }
@@ -195,7 +201,7 @@ app.get("/list", function (req, res) {
             if (data) {
                 var responseData = [];
                 for (var i = 0; i < data.length; i++) {
-                    //Create new array for the output combining the response
+                    //Take the amount you have away from the needed amount
                     var amount = data[i]['row'][1] - data[i]['row'][2];
                     if (amount > 0) {
                         responseData.push({
@@ -219,12 +225,13 @@ app.get("/list", function (req, res) {
 
 app.patch("/recipe", function (req, res) {
     var parameters = req.body;
-    //Check if the user and recipe already exists in the app
+    //Unlink the recipe from the user - don't delete so it is still available in the search
     unlink.deleteRecipe(parameters)
     //Get the response from matchParameters
         .then(function (response) {
+            var userResponse = response.data.results[0].data[0].row[0]
             if (response.data.results[0].data || response.data.results[1].data) {
-                return res.send("SUCCESS Recipe deleted for " + response.data.results[0].data[0].row[0]['name']);
+                return res.send("SUCCESS Recipe deleted for " + userResponse['name']);
             } else {
                 res.send("Error when deleting recipe" + response.data.errors[0].code + " " + response.data.errors[0].message);
             }
@@ -276,7 +283,7 @@ app.get("/pull", function (req, res) {
                     //Get the response from createNodesandRelationships
                     .then(function (response) {
                         if (response.data.results[0].data) {
-                            return res.send("SUCCESS New recipe node created " + response.data.results[0].data[0].row[0]['name']);
+                            return res.send("SUCCESS New recipe node created for admin");
                         } else {
                             return res.send("ERROR creating recipe node " + response.data.errors[0].code + " " + createResponse.data.errors[0].message);
                         }

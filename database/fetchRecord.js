@@ -91,9 +91,8 @@ function fetchShoppingList(params) {
 
         }
     }
-    console.log(recipes)
 
-//Form statements
+    //Form statements
     for (var l = 0; l < recipes.length; l++) {
         statements.push({
             "statement": "MATCH (u:User)-[p:has]->(i:Ingredient)<-[r:contains]-(re:Recipe) WHERE u.name=$user and re.name=$recipe RETURN i,toInteger(r.amount)*$number, p.amount, p.type",
@@ -104,7 +103,6 @@ function fetchShoppingList(params) {
             }
         });
     }
-
     return axios.post(config.url, {
         "statements": statements
     })

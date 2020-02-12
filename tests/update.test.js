@@ -1,7 +1,6 @@
-const fetch = require('../database/fetchRecord');
+const update = require('../database/updateRecord');
 const axios = require('axios').default;
 const config = require("../config");
-
 beforeAll(() => {
     return axios.post(config.url, {
         "statements": [
@@ -70,70 +69,14 @@ beforeAll(() => {
     });
 })
 
-test('fetch ingredients for user', async () => {
-    var response = await fetch.fetchIngredients('admin');
-    var data = response.data.results[0].data;
-    var responseData = [{
-        'name': data[0]['row'][0]['name'],
-        'amount': data[0]['row'][1]['amount'],
-        'type': data[0]['row'][1]['type'],
-        'location': data[0]['row'][1]['location'],
-        'useByDate': data[0]['row'][1]['useByDate']
-    }];
-    expect(responseData[0]['name']).toBe('Chicken Breast');
-    expect(responseData[0]['amount']).toBe(2);
-    expect(responseData[0]['type']).toBe('number');
-    expect(responseData[0]['location']).toBe('Fridge');
-    expect(responseData[0]['useByDate']).toBe('19022020');
-});
 
-test('fetch recipes for user', async () => {
-    var response = await fetch.fetchRecipes('admin');
-    var data = response.data.results[0].data;
-    var responseData = [{
-        'recipeName': data[0]['row'][0]['name'],
-        'servings': data[0]['row'][0]['servings'],
-        'name': data[0]['row'][1][0][0]['name'],
-        'amount': data[0]['row'][1][0][1]['amount'],
-        'type': data[0]['row'][1][0][1]['type'],
-    }];
-    expect(responseData[0]['recipeName']).toBe('Just Chicken');
-    expect(responseData[0]['servings']).toBe(2);
-    expect(responseData[0]['name']).toBe('Chicken Breast');
-    expect(responseData[0]['amount']).toBe(1);
-    expect(responseData[0]['type']).toBe('number');
-});
-
-test('fetch recipe just chicken', async () => {
-    var response = await fetch.fetchRecipe('Just Chicken');
-    var data = response.data.results[0].data;
-    var responseData = [{
-        'recipeName': data[0]['row'][0]['name'],
-        'servings': data[0]['row'][0]['servings'],
-        'name': data[0]['row'][2]['name'],
-        'amount': data[0]['row'][1]['amount'],
-        'type': data[0]['row'][1]['type'],
-    }];
-    expect(responseData[0]['recipeName']).toBe('Just Chicken');
-    expect(responseData[0]['servings']).toBe(2);
-    expect(responseData[0]['name']).toBe('Chicken Breast');
-    expect(responseData[0]['amount']).toBe(1);
-    expect(responseData[0]['type']).toBe('number');
-});
-
-test('fetch shopping list', async () => {
+test('update shopping list', async () => {
     var parameters = {
-        'user': "admin",
-        'calendar': '[{"id": 1, "breakfast": ["Just Chicken","Just Chicken","Just Chicken","Just Chicken","Just Chicken","Just Chicken"], "lunch":[], "dinner":[]}]'
-    }
-    var response = await fetch.fetchShoppingList(parameters);
-    var data = response.data.results[0].data;
-    var responseData = [{
-        'name': data[0]['row'][0]['name'],
-        'amount': data[i]['row'][1] - data[i]['row'][2],
-        'type': data[i]['row'][3],
-    }];
-    expect(responseData[0]['name']).toBe('Chicken Breast');
-    expect(responseData[0]['amount']).toBe(4);
-    expect(responseData[0]['type']).toBe('number');
+        'user': 'admin',
+        'purchased': '[{"name":"Chicken Breast","amount":10,"type":"number"}]'
+    };
+
+    var updated = await update.updateShoppingList(parameters);
+    expect(updated.data.errors).toHaveLength(0);
+
 });

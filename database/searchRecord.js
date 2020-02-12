@@ -33,14 +33,15 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
             /**
              * Exclude ingredients that don't meet allergy concerns
             */
-            var ingredientAllergies = recipes[0].data[k].row[1][l][0].healthLabels.split(",");
+            var ingredient = recipes[0].data[k].row[1][l];
+            var ingredientAllergies = ingredient[0].healthLabels.split(",");
 	        for (var a = 0; a < allergies.length; a++) {
                 if (allergies[a].value == 1 && !ingredientAllergies.includes(allergies[a].name)) {
                     meetsAllergies = false
                 }
             }
-            var weightOne = parseFloat(recipes[0].data[k].row[1][l][1].weight / 100);
-            totalRecipeWeight = totalRecipeWeight + (parseInt(recipes[0].data[k].row[1][l][1].amount * weightOne));
+            var weightOne = parseFloat(ingredient[1].weight / 100);
+            totalRecipeWeight = totalRecipeWeight + (parseInt(ingredient[1].amount * weightOne));
         }
         if (meetsAllergies == false) {
             //Break out of the loop here to avoid any more calculations
@@ -49,41 +50,43 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
 
         for (var m = 0; m < recipes[0].data[k].row[1].length; m++) {
             //Check Prefer Lighter Weight - 1
-            console.log("Lighter Weight");
-            var weightOne = parseFloat(recipes[0].data[k].row[1][m][1].weight / 100);
+            console.log("Lighter Weight"); 
+            var ingredient = recipes[0].data[k].row[1][m];
+            var weightOne = parseFloat(ingredient[1].weight / 100);
             if (weightOne <= 300) {
-                score = score + (searchParameters[1] * ((recipes[0].data[k].row[1][m][1].amount * weightOne) / totalRecipeWeight));
+                score = score + (searchParameters[1] * ((ingredient[1].amount * weightOne) / totalRecipeWeight));
                 console.log(score);
             }
             //Check Prefer Matching Diet - 7
             console.log("Prefer Matching Diet");
             var matchDiets = true;
-            var ingredientDiets = recipes[0].data[k].row[1][m][0].dietLabels.split(",");
+            var ingredientDiets = ingredient[0].dietLabels.split(",");
             for (var d = 0; d < diets.length; d++) {
                 if (diets[d].value == 1 && !ingredientDiets.includes(diets[d].name)) {
                     matchDiets = false;
                 }
             }
             if (matchDiets == true) {
-                score = score + (searchParameters[7] * ((recipes[0].data[k].row[1][m][1].amount * weightOne) / totalRecipeWeight));
+                score = score + (searchParameters[7] * ((ingredient[1].amount * weightOne) / totalRecipeWeight));
                 console.log(score)
             }
             var varietyIngredient = true;
             for (var n = 0; n < userIngredients.data.length; n++) {
-                var weightOne = parseFloat(recipes[0].data[k].row[1][m][1].weight / 100);
+                var weightOne = parseFloat(ingredient[1].weight / 100);
+                var userIngredient = userIngredients.data[n].row[0];
                 //Check Prefer Owned Ingredients - 0
 		        console.log("Prefer Owned Ingredients");
-                if (recipes[0].data[k].row[1][m][0].name == userIngredients.data[n].row[0].name && userIngredients.data[n].row[0].amount >= recipes[0].data[k].row[1][m][1].amount) {
+                if (ingredient[0].name == userIngredient.name && userIngredient.amount >= ingredient[1].amount) {
                     console.log("Owned Ingredient");
-                    score = score + (searchParameters[0] * ((recipes[0].data[k].row[1][m][1].amount * weightOne) / totalRecipeWeight));
+                    score = score + (searchParameters[0] * ((ingredient[1].amount * weightOne) / totalRecipeWeight));
                     console.log(score);
-                } else if (recipes[0].data[k].row[1][m][0].name == userIngredients.data[n].row[0].name)
+                } else if (ingredient[0].name == userIngredient.name)
                     //Check Prefer Variety - 2
                     varietyIngredient = false;
             } 
             console.log("Variety Ingredient");
             if (varietyIngredient == true) {
-                score = score + (searchParameters[2] * ((recipes[0].data[k].row[1][m][1].amount * weightOne) / totalRecipeWeight));
+                score = score + (searchParameters[2] * ((ingredient[1].amount * weightOne) / totalRecipeWeight));
                 console.log(score);
             }
         }
