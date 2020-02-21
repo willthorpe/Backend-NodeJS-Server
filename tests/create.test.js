@@ -1,6 +1,6 @@
 const create = require('../database/createRecord');
 
-test('edanam pull nutrition in create record', async () => {
+test('edamam pull nutrition in create record', async () => {
     var ingredientParameters = await create.fetchNutrition("pineapple", 1, "number");
     expect(ingredientParameters["energy"]).toBe(452.50000000000006);
     expect(ingredientParameters["fat"]).toBe(1.086);

@@ -1,6 +1,6 @@
 const axios = require('axios').default;
 const config = require("../config");
-const edanam = require("../apis/edanam");
+const edamam = require("../apis/edamam");
 
 //Create nodes and relationships between user and ingredients
 async function createIngredientRelationships(params) {
@@ -18,7 +18,7 @@ async function createIngredientRelationships(params) {
     //Create ingredient
     var ingredientParameters = await fetchNutrition(params.name, params.amount, params.type);
     statements.push({
-        "statement": "MERGE (n:Ingredient {name:$name, dietLabel:$dietLabels,healthLabels:$healthLabels}) RETURN n",
+        "statement": "MERGE (n:Ingredient {name:$name, dietLabels:$dietLabels,healthLabels:$healthLabels}) RETURN n",
         "parameters": {
             'name': params.name,
             'dietLabels': ingredientParameters.dietLabels,
@@ -185,7 +185,7 @@ async function createRecipeRelationshipsBulk(recipes) {
 }
 
 async function fetchNutrition(ingredient, amount, type) {
-    var nutrition = await edanam.fetchNutritionalInfo(ingredient, amount, type);
+    var nutrition = await edamam.fetchNutritionalInfo(ingredient, amount, type);
     nutrition = nutrition.data;
     var ingredientParameters = {
         "name": ingredient,
