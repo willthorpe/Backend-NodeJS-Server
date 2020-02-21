@@ -15,10 +15,10 @@ beforeAll(() => {
                 }
             },
             {
-                "statement": "MERGE (n:Ingredient {name:$name, dietLabel:$dietLabels,healthLabels:$healthLabels}) RETURN n",
+                "statement": "MERGE (n:Ingredient {name:$name, dietLabels:$dietLabels,healthLabels:$healthLabels}) RETURN n",
                 "parameters": {
                     'name': "Chicken Breast",
-                    'dietLabels': "LOW_CARB",
+                    'dietLabels': "[LOW_CARB]",
                     'healthLabels': "SUGAR_CONSCIOUS, PEANUT_FREE, TREE_NUT_FREE, ALCOHOL_FREE, SULPHITE_FREE"
                 }
             },
@@ -41,7 +41,7 @@ beforeAll(() => {
                     "servings": 2,
                     "prepTime": 10,
                     "cookTime": 20,
-                    "method": "[Cook chicken]"
+                    "method": '["Cook chicken"]'
                 }
             },
             {

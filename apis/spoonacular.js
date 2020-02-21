@@ -3,8 +3,8 @@ const config = require("../config");
 
 function pullRecipes(number) {
     return axios.get(
-        config.spoontacular_url
-        + "?apiKey=" + config.spoontacular_key
+        config.spoonacular_url
+        + "?apiKey=" + config.spoonacular_key
         + "&number=" + number
         + "&tags=main course" 
     );

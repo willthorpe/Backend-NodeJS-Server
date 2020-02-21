@@ -11,7 +11,7 @@ const update = require("./database/updateRecord");
 const unlink = require("./database/unlinkRecord");
 const search = require("./database/searchRecord");
 
-const spoontacular = require("./apis/spoontacular");
+const spoonacular = require("./apis/spoonacular");
 
 app.post("/ingredient", function (req, res) {
     var parameters = req.body;
@@ -50,6 +50,26 @@ app.post("/recipe", function (req, res) {
         .catch(function (error) {
             if (error) {
                 res.send("Error when creating recipe " + error)
+            }
+        });
+});
+
+app.post("/link", function (req, res) {
+    var parameters = req.body;
+    //Check if the user and recipe already exists in the app
+    create.createRecipeUserLink(parameters)
+    //Get the response from creating the link
+        .then(function (response) {
+            var linkResponse = response.data.results[0].data;
+            if (linkResponse) {
+                return res.send("SUCCESS New link created for " + linkResponse[0].row[0]['name'] + " to " + linkResponse[1].row[0]['name']);
+            } else {
+                return res.send("ERROR creating link " + response.data.errors[0].code + " " + response.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when creating link " + error)
             }
         });
 });
@@ -271,10 +291,10 @@ app.get("/pull", function (req, res) {
     var parameters = req.query;
     var formattedRecipes = [];
     //Check if the user and recipe already exists in the app
-    spoontacular.pullRecipes(parameters.number)
+    spoonacular.pullRecipes(parameters.number)
         //Get the response from matchParameters
         .then(function (response) {
-            return spoontacular.formatRecipes(parameters.number, response.data.recipes);
+            return spoonacular.formatRecipes(parameters.number, response.data.recipes);
         })
         .then(function (formatResponse) {
             if (formatResponse !== []) {

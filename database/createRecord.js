@@ -184,6 +184,20 @@ async function createRecipeRelationshipsBulk(recipes) {
     });
 }
 
+function createRecipeUserLink(params){
+    return axios.post(config.url, {
+        "statements": [
+            {
+                "statement": "MATCH (u:User),(re:Recipe) WHERE u.name=$user and re.name=$recipe CREATE(u)- [r: makes] -> (re) return u, re",
+                "parameters": {
+                    "user": params.user,
+                    "recipe": params.recipe,
+                }
+            }
+        ],
+    });
+}
+
 async function fetchNutrition(ingredient, amount, type) {
     var nutrition = await edamam.fetchNutritionalInfo(ingredient, amount, type);
     nutrition = nutrition.data;
@@ -220,4 +234,5 @@ async function fetchNutrition(ingredient, amount, type) {
 module.exports.createIngredientRelationships = createIngredientRelationships;
 module.exports.createRecipeRelationships = createRecipeRelationships;
 module.exports.createRecipeRelationshipsBulk = createRecipeRelationshipsBulk;
+module.exports.createRecipeUserLink = createRecipeUserLink;
 module.exports.fetchNutrition = fetchNutrition;
