@@ -188,6 +188,12 @@ function createRecipeUserLink(params){
     return axios.post(config.url, {
         "statements": [
             {
+                "statement": "MERGE (n:User {name:$name}) RETURN n",
+                "parameters": {
+                    "name": params.user,
+                }
+            },
+            {
                 "statement": "MATCH (u:User),(re:Recipe) WHERE u.name=$user and re.name=$recipe CREATE(u)- [r: makes] -> (re) return u, re",
                 "parameters": {
                     "user": params.user,
