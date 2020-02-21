@@ -180,7 +180,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
         kMeansData.length,
         {
             initialization: 'kmeans++',
-            tolerance: 0.5
+            tolerance: 0.1
         }
     );
 
