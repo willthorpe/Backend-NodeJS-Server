@@ -1,6 +1,7 @@
 const axios = require('axios').default;
 const config = require("../config");
 const edamam = require("../apis/edamam");
+const tesco = require("../apis/tesco");
 
 //Create nodes and relationships between user and ingredients
 async function createIngredientRelationships(params) {
@@ -36,6 +37,7 @@ async function createIngredientRelationships(params) {
             "type": params.type,
             "useByDate": params.useByDate,
             "location": params.location,
+            "price": ingredientParameters.price
         }
     });
     return axios.post(config.url, {
@@ -91,6 +93,7 @@ async function createRecipeRelationships(params) {
                     "ingredient": ingredients[i]['name'],
                     "recipe": params.name,
                     "amount": parseInt(ingredients[i]['amount']),
+                    "price" : ingredientParameters.price,
                     "type": ingredients[i]['type'],
                     "weight": ingredientParameters.weight,
                     "calories": ingredientParameters.calories,
@@ -132,7 +135,7 @@ async function createRecipeRelationshipsBulk(recipes) {
                     "parameters": {
                         'name': ingredients[j]["name"],
                         'dietLabels': ingredientParameters.dietLabels,
-                        'healthLabels': ingredientParameters.healthLabels
+                        'healthLabels': ingredientParameters.healthLabels,
                     }
                 },
             );
@@ -168,6 +171,7 @@ async function createRecipeRelationshipsBulk(recipes) {
                     "recipe": recipes[i].name,
                     "amount": parseInt(ingredients[k]['amount']),
                     "type": ingredients[k]['type'],
+                    "price": ingredientParametersList[k].price,
                     "weight": ingredientParametersList[k].weight,
                     "calories": ingredientParametersList[k].calories,
                     "energy": ingredientParametersList[k].energy,
@@ -206,13 +210,16 @@ function createRecipeUserLink(params){
 
 async function fetchNutrition(ingredient, amount, type) {
     var nutrition = await edamam.fetchNutritionalInfo(ingredient, amount, type);
+    var tescoData = await tesco.fetchPriceData(ingredient, amount, type);
     nutrition = nutrition.data;
+
     var ingredientParameters = {
         "name": ingredient,
         "calories": nutrition.calories,
         "weight": nutrition.totalWeight,
         "dietLabels": nutrition.dietLabels.toString(),
-        "healthLabels": nutrition.healthLabels.toString()
+        "healthLabels": nutrition.healthLabels.toString(),
+        "price": tescoData.uk.ghs.products.results[0].price,
     };
 
     //Nutrition data
