@@ -29,7 +29,7 @@ async function createIngredientRelationships(params) {
 
     //Create link from user to ingredient
     statements.push({
-        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate}] -> (i) return u, i",
+        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate, price: $price}] -> (i) return u, i",
         "parameters": {
             "user": params.user,
             "ingredient": params.name,
@@ -88,7 +88,7 @@ async function createRecipeRelationships(params) {
         if (ingredients[i] != null) {
             var ingredientParameters = await fetchNutrition(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["type"]);
             statements.push({
-                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein}] -> (i) return i, re",
+                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein, price:$price}] -> (i) return i, re",
                 "parameters": {
                     "ingredient": ingredients[i]['name'],
                     "recipe": params.name,
@@ -124,6 +124,9 @@ async function createRecipeRelationshipsBulk(recipes) {
     });
     for (var i = 0; i < recipes.length; i++) {
         var ingredients = JSON.parse(recipes[i]['ingredients']);
+        if(recipes[i]['cookTime'] == null || recipes[i]['prepTime'] == null){
+            continue;
+        }
         var ingredientParametersList = [];
         //Add ingredients if not already in database
         for (var j = 0; j < ingredients.length; j++) {
@@ -165,7 +168,7 @@ async function createRecipeRelationshipsBulk(recipes) {
         //Create links from recipe to ingredients
         for (var k = 0; k < ingredients.length; k++) {
             statements.push({
-                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein}] -> (i) return i, re",
+                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein, price:$price}] -> (i) return i, re",
                 "parameters": {
                     "ingredient": ingredients[k]['name'],
                     "recipe": recipes[i].name,
@@ -211,6 +214,7 @@ function createRecipeUserLink(params){
 async function fetchNutrition(ingredient, amount, type) {
     var nutrition = await edamam.fetchNutritionalInfo(ingredient, amount, type);
     var tescoData = await tesco.fetchPriceData(ingredient, amount, type);
+    tescoData = JSON.parse(tescoData);
     nutrition = nutrition.data;
 
     var ingredientParameters = {
