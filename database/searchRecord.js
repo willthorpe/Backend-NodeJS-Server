@@ -144,7 +144,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
     //Prepare Data - fill in blanks
     //Make arrays same length
     for (var o = 0; o < kMeansData.length; o++) {
-        while (kMeansData[0].length < kMeansData[kMeansData.length - 1].length) {
+        while (kMeansData[o].length < kMeansData[kMeansData.length - 1].length) {
             kMeansData[o].push(0);
         }
     }
