@@ -10,7 +10,7 @@ test('edamam pull nutrition in create record', async () => {
 });
 
 test('create new ingredient', async () => {
-    parameters = {
+    var parameters = {
         'user' : 'User',
         'name' : 'Noodles',
         'type' : 'grams',
@@ -19,13 +19,13 @@ test('create new ingredient', async () => {
         'useByDate' : '20200210'
     };
 
-    var ingredientResponse = await create.createIngredientRelationships(parameters);
+    var ingredientResponse = await create.createIngredientNodes(parameters);
     expect(ingredientResponse.data.results[0].data[0].row[0]['name']).toBe('User');
     expect(ingredientResponse.data.results[1].data[0].row[0]['name']).toBe('Noodles');
 });
 
 test('create new recipe', async () => {
-    parameters = {
+    var parameters = {
         'user': 'User',
         'name': 'Literally Noodles',
         'servings': 4,
@@ -36,7 +36,7 @@ test('create new recipe', async () => {
         'ingredients': '[{ "name": "Noodles", "amount": 300, "type": "grams" }]'
     };
 
-    var recipeResponse = await create.createRecipeRelationships(parameters);
+    var recipeResponse = await create.createRecipeNodes(parameters);
     expect(recipeResponse.data.results[0].data[0].row[0]['name']).toBe('User');
     expect(recipeResponse.data.results[1].data[0].row[0]['name']).toBe('Literally Noodles');
 });

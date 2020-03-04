@@ -15,7 +15,7 @@ const spoonacular = require("./apis/spoonacular");
 
 app.post("/ingredient", function (req, res) {
     var parameters = req.body;
-    create.createIngredientRelationships(parameters)
+    create.createIngredientNodes(parameters)
     //Get the response from createNodesandRelationships
         .then(function (response) {
             var userResponse = response.data.results[0].data;
@@ -36,8 +36,8 @@ app.post("/ingredient", function (req, res) {
 app.post("/recipe", function (req, res) {
     var parameters = req.body;
     //Check if the user and recipe already exists in the app
-    create.createRecipeRelationships(parameters)
-        //Get the response from createNodesandRelationships
+    create.createRecipeNodes(parameters)
+    //Get the response from createNodesandRelationships
         .then(function (response) {
             var userResponse = response.data.results[0].data;
             var recipeResponse = response.data.results[1].data;
@@ -56,9 +56,12 @@ app.post("/recipe", function (req, res) {
 
 app.post("/link", function (req, res) {
     var parameters = req.body;
-    //Check if the user and recipe already exists in the app
-    create.createRecipeUserLink(parameters)
-    //Get the response from creating the link
+    //Link recipe to the user
+    fetch.fetchIngredients(parameters.user)
+        .then(function (fetchResponse) {
+            return create.createRecipeUserLink(parameters, fetchResponse.results.data);
+        })
+        //Get the response from creating the link
         .then(function (response) {
             var linkResponse = response.data.results[0].data;
             if (linkResponse) {
@@ -93,7 +96,7 @@ app.patch("/list", function (req, res) {
 });
 
 app.get("/ingredient", function (req, res) {
-    var parameters = req.query;  
+    var parameters = req.query;
     //Fetch the ingredients for the user
     fetch.fetchIngredients(parameters.user)
         .then(function (response) {
@@ -292,15 +295,15 @@ app.get("/pull", function (req, res) {
     var formattedRecipes = [];
     //Check if the user and recipe already exists in the app
     spoonacular.pullRecipes(parameters.number)
-        //Get the response from matchParameters
+    //Get the response from matchParameters
         .then(function (response) {
             return spoonacular.formatRecipes(parameters.number, response.data.recipes);
         })
         .then(function (formatResponse) {
             if (formatResponse !== []) {
                 formattedRecipes = formatResponse;
-                return create.createRecipeRelationshipsBulk(formattedRecipes)
-                    //Get the response from createNodesandRelationships
+                return create.createRecipeNodesBulk(formattedRecipes)
+                //Get the response from createNodesandRelationships
                     .then(function (response) {
                         if (response.data.results[0].data) {
                             return res.send("SUCCESS New recipe node created for admin");
