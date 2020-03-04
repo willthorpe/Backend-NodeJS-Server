@@ -212,12 +212,7 @@ function createRecipeUserLink(params, userIngredients) {
     //Create link from user to ingredients
     for (var i = 0; i < ingredients.length; i++) {
         found = false;
-        for (var j = 0; j < userIngredients.length; j++) {
-            if (ingredients[i][0]["name"] === userIngredients.data[j].row[0].name) {
-                found = true;
-            }
-        }
-        if (found === false) {
+        if(userIngredients === []){
             statements.push({
                 "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate}] -> (i) return u, i",
                 "parameters": {
@@ -229,6 +224,25 @@ function createRecipeUserLink(params, userIngredients) {
                     "location": "",
                 }
             });
+        }else{
+            for (var j = 0; j < userIngredients.length; j++) {
+                if (ingredients[i][0]["name"] === userIngredients.data[j].row[0].name) {
+                    found = true;
+                }
+            }
+            if (found === false) {
+                statements.push({
+                    "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate}] -> (i) return u, i",
+                    "parameters": {
+                        "user": params.user,
+                        "ingredient": ingredients[i][0]["name"],
+                        "amount": 0,
+                        "type": "",
+                        "useByDate": "",
+                        "location": "",
+                    }
+                });
+            }
         }
     }
 
