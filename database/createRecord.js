@@ -219,7 +219,7 @@ function createRecipeUserLink(params, userIngredients) {
                     "user": params.user,
                     "ingredient": ingredients[i][0]["name"],
                     "amount": 0,
-                    "type": "",
+                    "type": ingredients[i][1]["type"],
                     "useByDate": "",
                     "location": "",
                 }
@@ -237,7 +237,7 @@ function createRecipeUserLink(params, userIngredients) {
                         "user": params.user,
                         "ingredient": ingredients[i][0]["name"],
                         "amount": 0,
-                        "type": "",
+                        "type": ingredients[i][1]["type"],
                         "useByDate": "",
                         "location": "",
                     }
