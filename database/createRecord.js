@@ -190,7 +190,7 @@ async function createRecipeRelationshipsBulk(recipes) {
     });
 }
 
-function createRecipeUserLink(params) {
+function createRecipeUserLink(params, userIngredients) {
     var ingredients = JSON.parse(params.ingredients);
     var statements = [
         {
@@ -208,19 +208,28 @@ function createRecipeUserLink(params) {
         }
     ];
 
+    var found = false;
     //Create link from user to ingredients
     for (var i = 0; i < ingredients.length; i++) {
-        statements.push({
-            "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: (i.amount + $amount), type: ($type + ''), location: ($location + ''), useByDate: $useByDate}] -> (i) return u, i",
-            "parameters": {
-                "user": params.user,
-                "ingredient": ingredients[i][0]["name"],
-                "amount": 0,
-                "type": "",
-                "useByDate": "",
-                "location": "",
+        found = false;
+        for (var j = 0; j < userIngredients.length; j++) {
+            if (ingredients[i][0]["name"] === userIngredients.data[j].row[0].name) {
+                found = true;
             }
-        });
+        }
+        if (found === false) {
+            statements.push({
+                "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate}] -> (i) return u, i",
+                "parameters": {
+                    "user": params.user,
+                    "ingredient": ingredients[i][0]["name"],
+                    "amount": 0,
+                    "type": "",
+                    "useByDate": "",
+                    "location": "",
+                }
+            });
+        }
     }
 
     return axios.post(config.url, {
