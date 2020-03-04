@@ -212,7 +212,7 @@ function createRecipeUserLink(params, userIngredients) {
     //Create link from user to ingredients
     for (var i = 0; i < ingredients.length; i++) {
         found = false;
-        if(userIngredients === []){
+        if(userIngredients == null){
             statements.push({
                 "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate}] -> (i) return u, i",
                 "parameters": {
