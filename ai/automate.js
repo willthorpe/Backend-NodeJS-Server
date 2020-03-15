@@ -94,8 +94,8 @@ function addToFreeTime(start, end, freeTimes, preferences) {
 }
 
 function createMealTimes(start, meal) {
-    meal[0] = new Date(start.getFullYear(), start.getMonth(), start.getDate(), meal[0], 0, 0, 0);
-    meal[1] = new Date(start.getFullYear(), start.getMonth(), start.getDate(), meal[1], 0, 0, 0);
+    meal['start'] = new Date(start.getFullYear(), start.getMonth(), start.getDate(), meal[0], 0, 0, 0);
+    meal['end'] = new Date(start.getFullYear(), start.getMonth(), start.getDate(), meal[1], 0, 0, 0);
     return meal;
 }
 
@@ -104,23 +104,23 @@ function calculateFreeMinutes(start, end, meal) {
     var freeMinutes = 0;
 
     //If time is inside bracket take full time
-    if (meal[0] > start && meal[1] < end && meal[1] > start && meal[0] < end) {
-        freeMinutes = (meal[1] - meal[0]) / 60000;
+    if (meal['start'] > start && meal['end'] < end && meal['end'] > start && meal['start'] < end) {
+        freeMinutes = (meal['end'] - meal['start']) / 60000;
     }
 
     //If event cuts off end meal time
-    if (meal[0] > start && meal[1] > end && meal[1] > start && meal[0] < end) {
-        freeMinutes = (end - meal[0]) / 60000
+    if (meal['start'] > start && meal['end'] > end && meal['end'] > start && meal['start'] < end) {
+        freeMinutes = (end - meal['start']) / 60000
     }
 
     //If event cuts off meal start time
-    if (meal[0] < start && meal[1] < end && meal[1] > start && meal[0] < end) {
-        freeMinutes = (meal[1] - start) / 60000;
+    if (meal['start'] < start && meal['end'] < end && meal['end'] > start && meal['start'] < end) {
+        freeMinutes = (meal['end'] - start) / 60000;
     }
 
     //If event cuts off meal start and finish time
-    if (meal[0] < start && meal[1] > end && meal[1] > start && meal[0] < end) {
-        freeMinutes = Math.abs(((meal[1] - meal[0]) - (meal[1] - start) - (end - meal[0])) / 60000);
+    if (meal['start'] < start && meal['end'] > end && meal['end'] > start && meal['start'] < end) {
+        freeMinutes = Math.abs(((meal['end'] - meal['start']) - (meal['end'] - start) - (end - meal['start'])) / 60000);
     }
 
     return freeMinutes;
