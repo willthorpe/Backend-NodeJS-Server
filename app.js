@@ -10,6 +10,7 @@ const fetch = require("./database/fetchRecord");
 const update = require("./database/updateRecord");
 const unlink = require("./database/unlinkRecord");
 const search = require("./database/searchRecord");
+const automate = require("./ai/automate");
 
 const spoonacular = require("./apis/spoonacular");
 
@@ -252,7 +253,7 @@ app.patch("/recipe", function (req, res) {
     unlink.deleteRecipe(parameters)
     //Get the response from matchParameters
         .then(function (response) {
-            var userResponse = response.data.results[0].data[0].row[0]
+            var userResponse = response.data.results[0].data[0].row[0];
             if (response.data.results[0].data || response.data.results[1].data) {
                 return res.send("SUCCESS Recipe deleted for " + userResponse['name']);
             } else {
@@ -288,20 +289,38 @@ app.patch("/ingredient", function (req, res) {
 
 app.get("/search", function (req, res) {
     var parameters = req.query;
-    var recipes = []
+    var recipes = [];
     //Return results for the user query
     fetch.fetchAllRecipes()
         .then(function (fetchResponse) {
             recipes = fetchResponse.data.results;
             return fetch.fetchIngredients(parameters.user);
         }).then(function (ingredientResponse) {
-            return search.searchRecipe(ingredientResponse.data.results[0], recipes, JSON.parse(parameters.search), JSON.parse(parameters.diets),JSON.parse(parameters.allergies))
-        }).then(function (searchResponse) {
-            if (searchResponse != null) {
-                return res.send(searchResponse);
-            } else {
-                res.send("Error when searching recipe");
+        return search.searchRecipe(ingredientResponse.data.results[0], recipes, JSON.parse(parameters.search), JSON.parse(parameters.diets), JSON.parse(parameters.allergies))
+    }).then(function (searchResponse) {
+        if (searchResponse != null) {
+            return res.send(searchResponse);
+        } else {
+            res.send("Error when searching recipe");
+        }
+    })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when searching recipe " + error)
             }
+        });
+});
+
+app.get("/automate", function (req, res) {
+    var parameters = req.query;
+    console.log(parameters);
+    //Return results for automating the calendar
+    fetch.fetchRecipes(parameters.user)
+        .then(function (response) {
+            return automate.automateCalendar(parameters, response.data.results[0].data);
+        })
+        .then(function (automateResponse) {
+            res.send(automateResponse);
         })
         .catch(function (error) {
             if (error) {
