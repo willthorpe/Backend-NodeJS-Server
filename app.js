@@ -60,7 +60,7 @@ app.post("/link", function (req, res) {
     //Link recipe to the user
     fetch.fetchIngredients(parameters.user)
         .then(function (fetchResponse) {
-            return create.createRecipeUserLink(parameters, fetchResponse.results.data);
+            return create.createRecipeUserLink(parameters, fetchResponse.data.results.data);
         })
         //Get the response from creating the link
         .then(function (response) {
