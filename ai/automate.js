@@ -32,7 +32,7 @@ function automateCalendar(preferences, recipes) {
         //Check if new day for the event
         var start = new Date(busyTimes[busyItem].start);
         if (freeTimes.length === 0 || start.getDay() !== freeTimes[freeTimes.length - 1].start.getDay()) {
-            var previousMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 1, 0, 0, 0);
+            var previousMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0);
             freeTimes = addToFreeTime(previousMidnight, start, freeTimes, preferences);
         }
 
@@ -42,7 +42,7 @@ function automateCalendar(preferences, recipes) {
         //If current event is strictly before new event
         if (end - start > 0) {
             if (end.getDate() !== start.getDate()) {
-                var futureMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 24, 59, 59, 999);
+                var futureMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 23, 59, 59, 999);
                 //If an event crosses over days
                 freeTimes = addToFreeTime(start, futureMidnight, freeTimes, preferences);
             } else {
@@ -55,7 +55,7 @@ function automateCalendar(preferences, recipes) {
 
     //Add free time from last event in the week until midnight
     var start = freeTimes[freeTimes.length - 1].end;
-    var futureMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 24, 59, 59, 999);
+    var futureMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 23, 59, 59, 999);
     //Add time until midnight to last event of the last day
     freeTimes = addToFreeTime(start, futureMidnight, freeTimes, preferences);
 
