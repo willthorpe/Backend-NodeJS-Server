@@ -72,18 +72,22 @@ function automateCalendar(preferences, recipes) {
     //Add through best fit/first fit - randomise recipes at the start
     collatedRecipes = shuffle(collatedRecipes);
     //var weekFrequency = preferences.weekFrequency;
+    var meals = JSON.parse(preferences.meals);
+    var breakfast = createMealTimes(start, meals.breakfast);
+    var lunch = createMealTimes(start, meals.lunch);
+    var dinner = createMealTimes(start, meals.dinner);
     var eatingTime = preferences.eatingTime;
 
     for (var k = 0; k < collatedRecipes.length; k++) {
         if (collatedRecipes[k].tag == "breakfast") {
             //Breakfast meals
-            findMealSlot("Breakfast", freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("Breakfast", breakfast[2], freeTimes, collatedRecipes[k], eatingTime);
         } else if (collatedRecipes[k].tag == "lunch") {
             //Lunch meals
-            findMealSlot("Lunch", freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("Lunch", lunch[2], freeTimes, collatedRecipes[k], eatingTime);
         } else {
             //Dinner meals
-            findMealSlot("dinner", freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("dinner", dinner[2], freeTimes, collatedRecipes[k], eatingTime);
         }
     }
 
@@ -99,9 +103,10 @@ function automateCalendar(preferences, recipes) {
  */
 function addToFreeTime(start, end, freeTimes, preferences) {
     //Raw variables
-    var breakfast = createMealTimes(start, JSON.parse(preferences.breakfast));
-    var lunch = createMealTimes(start, JSON.parse(preferences.lunch));
-    var dinner = createMealTimes(start, JSON.parse(preferences.dinner));
+    var meals = JSON.parse(preferences.meals);
+    var breakfast = createMealTimes(start, meals.breakfast);
+    var lunch = createMealTimes(start, meals.lunch);
+    var dinner = createMealTimes(start, meals.dinner);
 
     //Work out time free for breakfast, lunch and dinner
     var breakfastMinutes = calculateFreeMinutes(start, end, breakfast);
@@ -166,25 +171,28 @@ function calculateFreeMinutes(start, end, meal) {
     return freeMinutes;
 }
 
-function findMealSlot(meal, freeTimes, recipe,  eatingTime) {
+function findMealSlot(meal, duplicates, freeTimes, recipe,  eatingTime) {
+    var filledSlots = 0;
+
     for (var slot = 0; slot < freeTimes.length; slot++) {
         //Add to the calendar if it fits
         if(freeTimes[slot][meal] >= (parseInt(recipe.totalTime) + parseInt(eatingTime))){
-            freeTimes[slot][meal] = recipe;
+            if(filledSlots === 0 && duplicates === false || duplicates === true){
+                freeTimes[slot][meal] = recipe;
+                filledSlots ++;
 
-            //Check other slots and update if no longer needs a meal
-            for (var checkSlot = 0; checkSlot < freeTimes.length; checkSlot++) {
-                if(freeTimes[checkSlot]["day"] === freeTimes[slot]["day"]){
-                    //Set the times for the rest of the day to 0 for that meal.
-                    for (let [key, value] of Object.entries(freeTimes[checkSlot])) {
-                        if(key === meal){
-                            value = 0;
+                //Check other slots and update if no longer needs a meal
+                for (var checkSlot = 0; checkSlot < freeTimes.length; checkSlot++) {
+                    if(freeTimes[checkSlot]["day"] === freeTimes[slot]["day"]){
+                        //Set the times for the rest of the day to 0 for that meal.
+                        for (let [key, value] of Object.entries(freeTimes[checkSlot])) {
+                            if(key === meal){
+                                value = 0;
+                            }
                         }
                     }
                 }
             }
-
-            break;
         }
     }
 
