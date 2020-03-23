@@ -62,12 +62,7 @@ function automateCalendar(preferences, recipes) {
     /**
      * Algorithm Part 3 - Add Recipes to Calendar
      */
-
-    //Calendar structure
-    //Day
-    //Time Start
-    //Time End
-    //Recipe
+    var mealCalendar = [];
 
     //Add through best fit/first fit - randomise recipes at the start
     collatedRecipes = shuffle(collatedRecipes);
@@ -79,18 +74,19 @@ function automateCalendar(preferences, recipes) {
     var eatingTime = preferences.eatingTime;
 
     for (var k = 0; k < collatedRecipes.length; k++) {
-        if (collatedRecipes[k].tag == "breakfast") {
+        if (collatedRecipes[k].tag === "breakfast") {
             //Breakfast meals
             findMealSlot("Breakfast", breakfast[2], freeTimes, collatedRecipes[k], eatingTime);
-        } else if (collatedRecipes[k].tag == "lunch") {
+        } else if (collatedRecipes[k].tag === "lunch") {
             //Lunch meals
-            findMealSlot("Lunch", lunch[2], freeTimes, collatedRecipes[k], eatingTime);
+             findMealSlot("Lunch", lunch[2], freeTimes, collatedRecipes[k], eatingTime);
         } else {
             //Dinner meals
             findMealSlot("dinner", dinner[2], freeTimes, collatedRecipes[k], eatingTime);
         }
     }
 
+    return freeTimes;
 }
 
 /**
@@ -196,7 +192,7 @@ function findMealSlot(meal, duplicates, freeTimes, recipe,  eatingTime) {
         }
     }
 
-    console.log(freeTimes);
+    return freeTimes;
 }
 
 module.exports.automateCalendar = automateCalendar;
