@@ -86,7 +86,29 @@ function automateCalendar(preferences, recipes) {
         }
     }
 
-    return freeTimes;
+    var day = 0;
+
+    console.log(freeTimes);
+
+    for(var slot = 0; slot < freeTimes.length; slot++){
+        if(freeTimes[slot]['day'] === day){
+            //If same day
+            mealCalendar = addToCalendar(mealCalendar, freeTimes[slot]);
+        }else{
+            //If different day to the above
+            day = freeTimes[slot]['day'];
+            mealCalendar.push({
+               'breakfast':'',
+               'lunch' : '',
+               'dinner': '',
+                'day' : day
+            });
+            mealCalendar = addToCalendar(mealCalendar, freeTimes[slot]);
+        }
+    }
+
+    console.log(mealCalendar);
+    return mealCalendar;
 }
 
 /**
@@ -167,22 +189,31 @@ function calculateFreeMinutes(start, end, meal) {
     return freeMinutes;
 }
 
+/**
+ * Find slots in the calendar for each meal
+ * @param meal
+ * @param duplicates
+ * @param freeTimes
+ * @param recipe
+ * @param eatingTime
+ * @returns {*}
+ */
 function findMealSlot(meal, duplicates, freeTimes, recipe,  eatingTime) {
     var filledSlots = 0;
 
     for (var slot = 0; slot < freeTimes.length; slot++) {
         //Add to the calendar if it fits
-        if(freeTimes[slot][meal] >= (parseInt(recipe.totalTime) + parseInt(eatingTime))){
-            if(filledSlots === 0 && duplicates === false || duplicates === true){
+        if (freeTimes[slot][meal] >= (parseInt(recipe.totalTime) + parseInt(eatingTime))) {
+            if (filledSlots === 0 && duplicates === false || duplicates === true) {
                 freeTimes[slot][meal] = recipe;
-                filledSlots ++;
+                filledSlots++;
 
                 //Check other slots and update if no longer needs a meal
                 for (var checkSlot = 0; checkSlot < freeTimes.length; checkSlot++) {
-                    if(freeTimes[checkSlot]["day"] === freeTimes[slot]["day"]){
+                    if (freeTimes[checkSlot]["day"] === freeTimes[slot]["day"]) {
                         //Set the times for the rest of the day to 0 for that meal.
                         for (let [key, value] of Object.entries(freeTimes[checkSlot])) {
-                            if(key === meal){
+                            if (key === meal) {
                                 value = 0;
                             }
                         }
@@ -193,6 +224,26 @@ function findMealSlot(meal, duplicates, freeTimes, recipe,  eatingTime) {
     }
 
     return freeTimes;
+}
+
+/**
+ * Combine free slots into each day in calendar
+ * @param mealCalendar
+ * @param slot
+ * @returns {*}
+ */
+function addToCalendar(mealCalendar, slot){
+    if(slot['breakfast']['name'] != null){
+        mealCalendar[mealCalendar.length - 1]['breakfast'] = slot['breakfast']['name'];
+    }
+    if(slot['lunch']['name'] != null){
+        mealCalendar[mealCalendar.length - 1]['lunch'] = slot['lunch']['name'];
+    }
+    if(slot['dinner']['name'] != null){
+        mealCalendar[mealCalendar.length - 1]['dinner'] = slot['dinner']['name'];
+    }
+
+    return mealCalendar;
 }
 
 module.exports.automateCalendar = automateCalendar;
