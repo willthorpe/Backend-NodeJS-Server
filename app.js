@@ -371,13 +371,10 @@ app.get("/graph/recipe", function (req, res) {
                 var calendars = JSON.parse(parameters.calendars);
                 var data = [];
 
-                console.log(recipes);
-                console.log(calendars);
-
-                for (var recipe = 0; recipe < recipes.length; recipe++) {
+                for (var recipe = 0; recipe < recipes[0].data.length; recipe++) {
                     data.push(
                         {
-                            'recipe': recipes[recipe].data[0].row[0].name,
+                            'recipe': recipes[0].data[recipe].row[0].name,
                             'amount': 0
                         })
                 }
