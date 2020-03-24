@@ -361,6 +361,58 @@ app.get("/pull", function (req, res) {
         });
 });
 
+app.get("/graph/recipe", function (req, res) {
+    var parameters = req.query;
+    fetch.fetchRecipeGraphData(parameters.user)
+    //Update the shopping list with bought amounts
+        .then(function (response) {
+            if (response.data.results[0].data) {
+                var recipes = response.data.results;
+                var calendars = JSON.parse(parameters.calendars);
+                var data = [];
+
+                console.log(recipes);
+                console.log(calendars);
+
+                for (var recipe = 0; recipe < recipes.length; recipe++) {
+                    data.push(
+                        {
+                            'recipe': recipes[recipe].data[0].row[0].name,
+                            'amount': 0
+                        })
+                }
+
+                for (var datum = 0; datum < data.length; datum++) {
+                    for (var calendar = 0; calendar < calendars.length; calendar++) {
+                        for (var i = 0; i < calendars[calendar].breakfast.length; i++) {
+                            if (calendars[calendar].breakfast[i] === data[datum].recipe) {
+                                data[datum].amount++;
+                            }
+                        }
+                        for (var j = 0; j < calendars[calendar].lunch.length; j++) {
+                            if (calendars[calendar].lunch[j] === data[datum].recipe) {
+                                data[datum].amount++;
+                            }
+                        }
+                        for (var k = 0; k < calendars[calendar].dinner.length; k++) {
+                            if (calendars[calendar].dinner[k] === data[datum].recipe) {
+                                data[datum].amount++;
+                            }
+                        }
+                    }
+                }
+                return res.send(data);
+            } else {
+                res.send("Error when fetching recipe graph" + response.data.errors[0].code + " " + response.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when updating recipe graph " + error)
+            }
+        });
+});
+
 var server = app.listen(3000, function () {
     console.log("Listening on port %s...", server.address().port);
 });
