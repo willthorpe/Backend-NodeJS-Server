@@ -255,10 +255,10 @@ function bestFitMeals(mealCalendar, slot, meal, duplicates) {
         var bestTime = 9999;
         var bestMeal;
         for (var i = 0; i < slot.length; i++) {
+            var occurrences = 0;
             if (duplicates === false) {
-                var occurrences = 0;
                 for (var j = 0; j < mealCalendar.length; j++) {
-                    if(mealCalendar[j]['dinner'] === slot[i]){
+                    if(mealCalendar[j][meal] === slot[i]['name']){
                         occurrences++;
                     }
                 }
@@ -271,7 +271,9 @@ function bestFitMeals(mealCalendar, slot, meal, duplicates) {
                 bestMeal = slot[i]['name'];
             }
         }
-        mealCalendar[mealCalendar.length - 1][meal] = bestMeal;
+        if(bestMeal != null){
+            mealCalendar[mealCalendar.length - 1][meal] = bestMeal;
+        }
     } else if (slot != null && slot.length === 1) {
         //If only one meal option
         mealCalendar[mealCalendar.length - 1][meal] = slot[0]['name'];
