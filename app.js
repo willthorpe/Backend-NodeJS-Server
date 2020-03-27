@@ -10,7 +10,7 @@ const fetch = require("./database/fetchRecord");
 const update = require("./database/updateRecord");
 const unlink = require("./database/unlinkRecord");
 const search = require("./database/searchRecord");
-const automate = require("./ai/automate");
+const automate = require("./algorithm/automate");
 
 const spoonacular = require("./apis/spoonacular");
 

@@ -60,54 +60,80 @@ function automateCalendar(preferences, recipes) {
     freeTimes = addToFreeTime(start, futureMidnight, freeTimes, preferences);
 
     /**
-     * Algorithm Part 3 - Add Recipes to Calendar
+     * Algorithm Part 3 - Find Slots for Meals in Calendar
      */
-    var mealCalendar = [];
 
-    //Add through best fit/first fit - randomise recipes at the start
+    //Add through best fit - randomise recipes at the start
     collatedRecipes = shuffle(collatedRecipes);
+
     //var weekFrequency = preferences.weekFrequency;
-    var meals = JSON.parse(preferences.meals);
-    var breakfast = createMealTimes(start, meals.breakfast);
-    var lunch = createMealTimes(start, meals.lunch);
-    var dinner = createMealTimes(start, meals.dinner);
     var eatingTime = preferences.eatingTime;
 
     for (var k = 0; k < collatedRecipes.length; k++) {
         if (collatedRecipes[k].tag === "breakfast") {
             //Breakfast meals
-            findMealSlot("Breakfast", breakfast[2], freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("Breakfast", freeTimes, collatedRecipes[k], eatingTime);
         } else if (collatedRecipes[k].tag === "lunch") {
             //Lunch meals
-             findMealSlot("Lunch", lunch[2], freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("Lunch", freeTimes, collatedRecipes[k], eatingTime);
         } else {
             //Dinner meals
-            findMealSlot("dinner", dinner[2], freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("dinner", freeTimes, collatedRecipes[k], eatingTime);
         }
     }
 
+    //Merge slots together for each meal
     var day = 0;
-
-    console.log(freeTimes);
-
-    for(var slot = 0; slot < freeTimes.length; slot++){
-        if(freeTimes[slot]['day'] === day){
+    var collatedSlot = 0;
+    var collatedTimes = [];
+    for (var slot = 0; slot < freeTimes.length; slot++) {
+        if (freeTimes[slot]['day'] === day) {
             //If same day
-            mealCalendar = addToCalendar(mealCalendar, freeTimes[slot]);
-        }else{
+            collatedSlot['breakfastMeals'] = collatedSlot['breakfastMeals'].concat(freeTimes[slot]['breakfastMeals']);
+            collatedSlot['lunchMeals'] = collatedSlot['lunchMeals'].concat(freeTimes[slot]['lunchMeals']);
+            collatedSlot['dinnerMeals'] = collatedSlot['dinnerMeals'].concat(freeTimes[slot]['dinnerMeals']);
+            freeTimes[slot] = '';
+        } else {
             //If different day to the above
+            if (day != 0) {
+                collatedTimes.push(collatedSlot);
+            }
             day = freeTimes[slot]['day'];
-            mealCalendar.push({
-               'breakfast':'',
-               'lunch' : '',
-               'dinner': '',
-                'day' : day
-            });
-            mealCalendar = addToCalendar(mealCalendar, freeTimes[slot]);
+            collatedSlot = freeTimes[slot];
         }
     }
+    //Add last day
+    collatedTimes.push(collatedSlot);
+    console.log(collatedTimes);
 
-    console.log(mealCalendar);
+    /**
+     * Algorithm Part 4 - Best Fit Recipes in each slot
+     */
+    var mealCalendar = [];
+    var meals = JSON.parse(preferences.meals);
+    var breakfast = createMealTimes(start, meals.breakfast);
+    var lunch = createMealTimes(start, meals.lunch);
+    var dinner = createMealTimes(start, meals.dinner);
+
+    for (var calendarDay = 0; calendarDay < collatedTimes.length; calendarDay++) {
+        mealCalendar.push({
+            'breakfast': '',
+            'lunch': '',
+            'dinner': '',
+            'day': collatedTimes[calendarDay]['day']
+        });
+
+        //Breakfast
+        mealCalendar = bestFitMeals(mealCalendar, collatedTimes[calendarDay]['breakfastMeals'], 'breakfast', breakfast[2]);
+
+        //Lunch
+        mealCalendar = bestFitMeals(mealCalendar, collatedTimes[calendarDay]['lunchMeals'], 'lunch', lunch[2]);
+
+        //Dinner
+        mealCalendar = bestFitMeals(mealCalendar, collatedTimes[calendarDay]['dinnerMeals'], 'dinner', dinner[2]);
+
+    }
+
     return mealCalendar;
 }
 
@@ -136,8 +162,11 @@ function addToFreeTime(start, end, freeTimes, preferences) {
         'start': start,
         'end': end,
         'day': start.getDate(),
+        'breakfastMeals': [],
         'breakfast': breakfastMinutes,
+        'lunchMeals': [],
         'lunch': lunchMinutes,
+        'dinnerMeals': [],
         'dinner': dinnerMinutes,
     });
     return freeTimes;
@@ -192,34 +221,17 @@ function calculateFreeMinutes(start, end, meal) {
 /**
  * Find slots in the calendar for each meal
  * @param meal
- * @param duplicates
  * @param freeTimes
  * @param recipe
  * @param eatingTime
  * @returns {*}
  */
-function findMealSlot(meal, duplicates, freeTimes, recipe,  eatingTime) {
-    var filledSlots = 0;
-
+function findMealSlot(meal, freeTimes, recipe, eatingTime) {
     for (var slot = 0; slot < freeTimes.length; slot++) {
         //Add to the calendar if it fits
         if (freeTimes[slot][meal] >= (parseInt(recipe.totalTime) + parseInt(eatingTime))) {
-            if (filledSlots === 0 && duplicates === false || duplicates === true) {
-                freeTimes[slot][meal] = recipe;
-                filledSlots++;
-
-                //Check other slots and update if no longer needs a meal
-                for (var checkSlot = 0; checkSlot < freeTimes.length; checkSlot++) {
-                    if (freeTimes[checkSlot]["day"] === freeTimes[slot]["day"]) {
-                        //Set the times for the rest of the day to 0 for that meal.
-                        for (let [key, value] of Object.entries(freeTimes[checkSlot])) {
-                            if (key === meal) {
-                                value = 0;
-                            }
-                        }
-                    }
-                }
-            }
+            recipe['plannedTime'] = freeTimes[slot][meal];
+            freeTimes[slot][(meal + 'Meals')].push(recipe);
         }
     }
 
@@ -230,19 +242,40 @@ function findMealSlot(meal, duplicates, freeTimes, recipe,  eatingTime) {
  * Combine free slots into each day in calendar
  * @param mealCalendar
  * @param slot
+ * @param meal
+ * @param duplicates
  * @returns {*}
  */
-function addToCalendar(mealCalendar, slot){
-    if(slot['breakfast']['name'] != null){
-        mealCalendar[mealCalendar.length - 1]['breakfast'] = slot['breakfast']['name'];
+function bestFitMeals(mealCalendar, slot, meal, duplicates) {
+    console.log(mealCalendar);
+    //If no meals
+    console.log(slot);
+    if (slot != null && slot.length > 1) {
+        //If multiple meals
+        var bestTime = 9999;
+        var bestMeal;
+        for (var i = 0; i < slot.length; i++) {
+            if (duplicates === false) {
+                var occurrences = 0;
+                for (var j = 0; j < mealCalendar.length; j++) {
+                    if(mealCalendar[j]['dinner'] === slot[i]){
+                        occurrences++;
+                    }
+                }
+            }
+            if(occurrences > 0 && duplicates === false){
+                continue;
+            }
+            if (slot[i]['plannedTime'] - slot[i]['totalTime'] < bestTime) {
+                bestTime = slot[i]['plannedTime'] - slot[i]['totalTime'];
+                bestMeal = slot[i]['name'];
+            }
+        }
+        mealCalendar[mealCalendar.length - 1][meal] = bestMeal;
+    } else if (slot != null && slot.length === 1) {
+        //If only one meal option
+        mealCalendar[mealCalendar.length - 1][meal] = slot[0]['name'];
     }
-    if(slot['lunch']['name'] != null){
-        mealCalendar[mealCalendar.length - 1]['lunch'] = slot['lunch']['name'];
-    }
-    if(slot['dinner']['name'] != null){
-        mealCalendar[mealCalendar.length - 1]['dinner'] = slot['dinner']['name'];
-    }
-
     return mealCalendar;
 }
 
