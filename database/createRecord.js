@@ -44,6 +44,11 @@ async function createRecipeNodes(params) {
     for (var i = 0; i < ingredients.length; i++) {
         if (ingredients[i] != null) {
             var ingredientParameters = await fetchNutrition(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["type"]);
+            //Double check ingredient created
+            statements = createIngredient(ingredients[i], ingredientParameters, statements);
+            statements = createIngredientUserRelationships(params.user, ingredients[i]["name"], 0, ingredients[i]["type"], '', '', statements);
+
+            //Add links to recipe
             statements = createIngredientRecipeRelationships(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["type"], params.name, ingredientParameters, statements);
         }
     }
