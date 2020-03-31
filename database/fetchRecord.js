@@ -6,7 +6,7 @@ function fetchIngredients(user) {
     return axios.post(config.url, {
         "statements": [
             {
-                "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user RETURN i,r",
+                "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user RETURN i,r ORDER BY i.name",
                 "parameters": {
                     "user": user,
                 }
@@ -48,7 +48,7 @@ function fetchRecipes(user) {
     return axios.post(config.url, {
         "statements": [
             {
-                "statement": "MATCH (u:User)-[p:makes]->(re:Recipe)-[r:contains]->(i:Ingredient) WHERE u.name=$user RETURN distinct re,collect([i,r])",
+                "statement": "MATCH (u:User)-[p:makes]->(re:Recipe)-[r:contains]->(i:Ingredient) WHERE u.name=$user RETURN distinct re,collect([i,r]) ORDER BY re.name",
                 "parameters": {
                     "user": user,
                 }
