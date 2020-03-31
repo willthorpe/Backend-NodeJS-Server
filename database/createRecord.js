@@ -163,11 +163,11 @@ function createRecipe(params, statements){
 
 function createIngredientUserRelationships(user, ingredient, amount, type, useByDate, location, statements){
     statements.push({
-        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate}] -> (i) return u, i",
+        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient MERGE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate}] -> (i) return u, i",
         "parameters": {
             "user": user,
             "ingredient": ingredient,
-            "amount": amount,
+            "amount": parseInt(amount),
             "type": type,
             "useByDate": useByDate,
             "location": location,
@@ -178,7 +178,7 @@ function createIngredientUserRelationships(user, ingredient, amount, type, useBy
 
 function createIngredientRecipeRelationships(ingredient, amount, type, recipe, parameters, statements){
     statements.push({
-        "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein, price:$price}] -> (i) return i, re",
+        "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe MERGE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein, price:$price}] -> (i) return i, re",
         "parameters": {
             "ingredient": ingredient,
             "recipe": recipe,
@@ -198,7 +198,7 @@ function createIngredientRecipeRelationships(ingredient, amount, type, recipe, p
 
 function createRecipeUserRelationships(user, recipe, statements){
     statements.push({
-        "statement": "MATCH (u:User),(re:Recipe) WHERE u.name=$user and re.name=$recipe CREATE(u)- [r: makes] -> (re) return u, re",
+        "statement": "MATCH (u:User),(re:Recipe) WHERE u.name=$user and re.name=$recipe MERGE(u)- [r: makes] -> (re) return u, re",
         "parameters": {
             "user": user,
             "recipe": recipe,
