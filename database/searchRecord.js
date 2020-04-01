@@ -106,7 +106,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
         //Check Prefer Shorter Recipes - 6
         var time = parseInt(recipes[0].data[k].row[0].cookTime) + parseInt(recipes[0].data[k].row[0].prepTime)
         if (time <= 60) {
-            recipeScore[6] += (60 - time) / 10;
+            recipeScore[6] += (60 - time) / 60;
         }
 	console.log("score");
 	console.log(recipeScore);
