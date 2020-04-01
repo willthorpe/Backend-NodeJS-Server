@@ -13,7 +13,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
     for (var i = 0; i < searchParameters.length; i++) {
         preferenceTotal = preferenceTotal + searchParameters[i]
     }
-    if(preferenceTotal !== 0){
+    if (preferenceTotal !== 0) {
         for (var j = 0; j < searchParameters.length; j++) {
             searchParameters[j] = parseFloat(searchParameters[j]) / parseFloat(preferenceTotal)
         }
@@ -108,15 +108,11 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
         if (time <= 60) {
             recipeScore[6] += (60 - time) / 60;
         }
-	console.log("score");
-	console.log(recipeScore);
 
         //Work out final score
-        for(var parameter = 0; parameter < recipeScore.length; parameter++){
+        for (var parameter = 0; parameter < recipeScore.length; parameter++) {
             recipeScore[parameter] *= 100 * searchParameters[parameter]
         }
-	console.log("final score");
-	console.log(recipeScore);
 
         //Add to score array
         var recipeDetails = recipes[0].data[k].row[0];
@@ -126,7 +122,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
             recipe: recipeDetails,
             method: methodList,
             ingredients: ingredientList,
-            score: Math.round(recipeScore.reduce((a,b) => a+b, 0))
+            score: Math.round(recipeScore.reduce((a, b) => a + b, 0))
         });
     }
     console.log(recipeScores);

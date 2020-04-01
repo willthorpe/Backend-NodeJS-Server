@@ -131,7 +131,7 @@ app.get("/nextRecipe", function (req, res) {
 
     fetch.fetchRecipe(parameters.recipe)
         .then(function (response) {
-            var recipeResponse = response.data.results[0].data[0]['row'][0]
+            var recipeResponse = response.data.results[0].data[0]['row'][0];
             var responseData = {
                 'name': recipeResponse['name'],
                 'tag': recipeResponse['tag'],
