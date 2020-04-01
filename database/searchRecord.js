@@ -89,32 +89,34 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
 
         //Check Popular Recipes - 3
         var popularity = recipes[1].data[0].row[0];
-        if (popularity <= 20) {
-            recipeScore[3] += popularity / 20;
-        }
+        recipeScore[3] += popularity / 50;
 
         //Check Prefer Less Ingredients - 4
         var ingredients = recipes[0].data[k].row[1].length;
         if (ingredients <= 10) {
-            recipeScore[4] += ingredients / 10;
+            recipeScore[4] += (10 - ingredients) / 10;
         }
 
         //Check Prefer Less Complex Recipes - 5
         var method = JSON.parse(recipes[0].data[k].row[0].method).length;
         if (method <= 10) {
-            recipeScore[5] += method / 10;
+            recipeScore[5] += (10 - method) / 10;
         }
 
         //Check Prefer Shorter Recipes - 6
         var time = parseInt(recipes[0].data[k].row[0].cookTime) + parseInt(recipes[0].data[k].row[0].prepTime)
         if (time <= 60) {
-            recipeScore[6] += time / 60;
+            recipeScore[6] += (60 - time) / 10;
         }
+	console.log("score");
+	console.log(recipeScore);
 
         //Work out final score
         for(var parameter = 0; parameter < recipeScore.length; parameter++){
             recipeScore[parameter] *= 100 * searchParameters[parameter]
         }
+	console.log("final score");
+	console.log(recipeScore);
 
         //Add to score array
         var recipeDetails = recipes[0].data[k].row[0];
@@ -127,7 +129,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
             score: Math.round(recipeScore.reduce((a,b) => a+b, 0))
         });
     }
-    console.log("finished");
+    console.log(recipeScores);
     //Sort recipes by score descending:
     recipeScores.sort(function (a, b) {
         return b.score - a.score
