@@ -8,6 +8,5 @@ jdk:
 services:
   - neo4j
 script:
-  - npm install
   - npm run test
   - npm run codecov
