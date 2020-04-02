@@ -130,8 +130,8 @@ test('fetch shopping list', async () => {
     var data = response.data.results[0].data;
     var responseData = [{
         'name': data[0]['row'][0]['name'],
-        'amount': data[i]['row'][1] - data[i]['row'][2],
-        'type': data[i]['row'][3],
+        'amount': data[0]['row'][1] - data[i]['row'][2],
+        'type': data[0]['row'][3],
     }];
     expect(responseData[0]['name']).toBe('Chicken Breast');
     expect(responseData[0]['amount']).toBe(4);
