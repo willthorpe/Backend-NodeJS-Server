@@ -3,6 +3,6 @@ node_js:
   - 9.5.0
 services:
   - neo4j
-install: npm install
+install: npm install && sudo neo4j start
 script: npm test
 #after_success: npm run coverage
