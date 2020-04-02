@@ -4,7 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest && codecov",
+    "codecov": "node codecov.js"
+  },
+  "jest": {
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true
   },
   "author": "",
   "license": "ISC",
@@ -17,7 +22,7 @@
     "tesco-api-node": "^1.3.0"
   },
   "devDependencies": {
-    "codecov": "^3.6.5",
-    "jest": "^25.1.0"
+    "jest": "^25.1.0",
+    "shelljs": "^0.8.3"
   }
 }
