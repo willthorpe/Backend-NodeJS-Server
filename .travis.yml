@@ -8,4 +8,6 @@ jdk:
 services:
   - neo4j
 script:
-  - jest --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
+  - npm install
+  - npm run test
+  - ./node_modules/.bin/codecov --token=:token
