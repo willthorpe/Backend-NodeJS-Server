@@ -9,6 +9,4 @@ services:
   - neo4j
 script:
   - npm install
-  - npm test
-after_success:
-  - npm run coverage
+  - jest --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && rm -rf ./coverage
