@@ -5,6 +5,7 @@ var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
+console.log(process.env);
 const create = require("./database/createRecord");
 const fetch = require("./database/fetchRecord");
 const update = require("./database/updateRecord");
