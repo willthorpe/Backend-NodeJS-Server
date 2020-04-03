@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest && codecov",
-    "codecov": "node codecov.js"
+    "test": "jest && codecov"
   },
   "jest": {
     "coverageDirectory": "./coverage/",
