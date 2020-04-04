@@ -1,7 +1,7 @@
 const axios = require('axios').default;
 const config = require("../config");
-const edamam = require("../apis/edamam");
-const tesco = require("../apis/tesco");
+const edamam = require("../api/edamam");
+const tesco = require("../api/tesco");
 
 //Create nodes and relationships between user and ingredients
 async function createIngredientNodes(params) {
