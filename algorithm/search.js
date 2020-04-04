@@ -1,5 +1,3 @@
-const axios = require('axios').default;
-const config = require("../config");
 const kmeans = require('ml-kmeans');
 
 //Search the recipes
@@ -9,39 +7,42 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
     var kMeansData = [];
     var kMeansLabels = [];
 
+    /**
+     * Algorithm Section 1 - Calculate parameter ratios
+     */
     //Calculate preference weighting compared to other preferences
-    for (var i = 0; i < searchParameters.length; i++) {
-        preferenceTotal = preferenceTotal + searchParameters[i]
+    for (let preference = 0; preference < searchParameters.length; preference++) {
+        preferenceTotal = preferenceTotal + searchParameters[preference]
     }
     if (preferenceTotal !== 0) {
-        for (var j = 0; j < searchParameters.length; j++) {
-            searchParameters[j] = parseFloat(searchParameters[j]) / parseFloat(preferenceTotal)
+        for (let preference = 0; preference < searchParameters.length; preference++) {
+            searchParameters[preference] = searchParameters[preference] / preferenceTotal
         }
     }
 
-    console.log(searchParameters);
     /**
-     * Algorithm Section 1 - Remove recipes with ingredients not matching allergies
+     * Algorithm Section 2 - Remove recipes with ingredients not matching allergies
      */
-    for (var k = 0; k < recipes[0].data.length; k++) {
-        console.log(recipes[0].data[0].row[0].name);
+    for (var recipeNo = 0; recipeNo < recipes[0].data.length; recipeNo++) {
         kMeansData.push([]);
         var recipeScore = [];
-        for (var preference = 0; preference < searchParameters.length; preference++) {
+        for (let preference = 0; preference < searchParameters.length; preference++) {
             recipeScore.push(0);
         }
         var totalRecipeWeight = 0;
         var meetsAllergies = true;
-        for (var l = 0; l < recipes[0].data[k].row[1].length; l++) {
+        for (let ingredientNo = 0; ingredientNo < recipes[0].data[recipeNo].row[1].length; ingredientNo++) {
             //Exclude ingredients that don't meet allergy concerns
-            var ingredient = recipes[0].data[k].row[1][l];
+            var ingredient = recipes[0].data[recipeNo].row[1][ingredientNo];
             var ingredientAllergies = ingredient[0].healthLabels.split(",");
+            //Check each allergy against all user allergies
             for (var a = 0; a < allergies.length; a++) {
                 if (allergies[a].value === 1 && !ingredientAllergies.includes(allergies[a].name)) {
-                    meetsAllergies = false
+                    meetsAllergies = false;
+                    break;
                 }
             }
-            totalRecipeWeight = totalRecipeWeight + ingredient[1].weight;
+            totalRecipeWeight += ingredient[1].weight;
         }
         if (meetsAllergies === false) {
             //Break out of the loop here to avoid any more calculations
@@ -49,16 +50,19 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
         }
 
         /**
-         * Algorithm Part 2 - Order recipes by score descending
+         * Algorithm Section 3 - Calculate scores relating to ingredient weights
          */
-        for (var m = 0; m < recipes[0].data[k].row[1].length; m++) {
+        for (let ingredientNo = 0; ingredientNo < recipes[0].data[recipeNo].row[1].length; ingredientNo++) {
             //Check Prefer Lighter Weight - 1
-            var ingredient = recipes[0].data[k].row[1][m];
+            ingredient = recipes[0].data[recipeNo].row[1][ingredientNo];
+            //Add the ingredient to the kmeans Array so recipe ingredients can be compared
             if (!kMeansLabels.includes(ingredient[0].name)) {
                 kMeansLabels.push(ingredient[0].name);
             }
-            kMeansData[k][kMeansLabels.indexOf(ingredient[0].name)] = ingredient[1].weight;
-            if (ingredient[1].weight <= 300) {
+            //Add ingredient weight to kmeans Data
+            kMeansData[recipeNo][kMeansLabels.indexOf(ingredient[0].name)] = ingredient[1].weight;
+            //An ingredient of less or equal to 400 grams is considered light
+            if (ingredient[1].weight <= 400) {
                 recipeScore[1] += ingredient[1].weight / totalRecipeWeight;
             }
             //Check Prefer Matching Diet - 7
@@ -87,42 +91,45 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
             }
         }
 
-        //Check Popular Recipes - 3
+        /**
+         * Algorithm Section 4 - Calculate scores not relating to ingredient weights
+         */
+            //Check Popular Recipes - 3
         var popularity = recipes[1].data[0].row[0];
         recipeScore[3] += popularity / 50;
 
         //Check Prefer Less Ingredients - 4
-        var ingredients = recipes[0].data[k].row[1].length;
+        var ingredients = recipes[0].data[recipeNo].row[1].length;
         if (ingredients <= 10) {
             recipeScore[4] += (10 - ingredients) / 10;
         }
 
         //Check Prefer Less Complex Recipes - 5
-        var method = JSON.parse(recipes[0].data[k].row[0].method).length;
+        var method = JSON.parse(recipes[0].data[recipeNo].row[0].method).length;
         if (method <= 10) {
             recipeScore[5] += (10 - method) / 10;
         }
 
         //Check Prefer Shorter Recipes - 6
-        var time = parseInt(recipes[0].data[k].row[0].cookTime) + parseInt(recipes[0].data[k].row[0].prepTime)
+        var time = parseInt(recipes[0].data[recipeNo].row[0].cookTime) + parseInt(recipes[0].data[recipeNo].row[0].prepTime)
         if (time <= 60) {
             recipeScore[6] += (60 - time) / 60;
         }
 
         //Work out final score
         for (var parameter = 0; parameter < recipeScore.length; parameter++) {
-            recipeScore[parameter] *= 100 * searchParameters[parameter]
+            recipeScore[parameter] *= searchParameters[parameter]
         }
 
         //Add to score array
-        var recipeDetails = recipes[0].data[k].row[0];
-        var methodList = JSON.parse(recipes[0].data[k].row[0].method);
-        var ingredientList = recipes[0].data[k].row[1];
+        var recipeDetails = recipes[0].data[recipeNo].row[0];
+        var methodList = JSON.parse(recipes[0].data[recipeNo].row[0].method);
+        var ingredientList = recipes[0].data[recipeNo].row[1];
         recipeScores.push({
-            recipe: recipeDetails,
+            recipeNo: recipeDetails,
             method: methodList,
             ingredients: ingredientList,
-            score: Math.round(recipeScore.reduce((a, b) => a + b, 0))
+            score: 100 * Math.round(recipeScore.reduce((a, b) => a + b, 0))
         });
     }
     console.log(recipeScores);
@@ -132,36 +139,36 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
     });
 
     /**
-     * Algorithm Part 3 - K-Means Clustering to pick highest of similar recipes
+     * Algorithm Section 5 - kMeans Clustering to pick highest of similar recipes
      */
     //Prepare Data - fill in blanks
     //Make arrays same length
-    for (var o = 0; o < kMeansData.length; o++) {
-        while (kMeansData[o].length < kMeansData[kMeansData.length - 1].length) {
-            kMeansData[o].push(0);
+    for (var data = 0; data < kMeansData.length; data++) {
+        while (kMeansData[data].length < kMeansData[kMeansData.length - 1].length) {
+            kMeansData[data].push(0);
         }
     }
     //Fill in blanks
-    for (var p = 0; p < kMeansData.length; p++) {
-        for (var q = 0; q < kMeansData[p].length; q++) {
-            if (kMeansData[p][q] == null) {
-                kMeansData[p][q] = 0;
+    for (let recipe = 0; recipe < kMeansData.length; recipe++) {
+        for (let ingredient = 0; ingredient < kMeansData[ingredient].length; ingredient++) {
+            if (kMeansData[recipe][ingredient] == null) {
+                kMeansData[recipe][ingredient] = 0;
             }
         }
     }
     //Normalise Data - values from min to max (0-1) for all ingredients
-    for (var r = 0; r < kMeansLabels.length; r++) {
+    for (let ingredient = 0; ingredient < kMeansLabels.length; ingredient++) {
         var max = 0;
         //Find maximum
-        for (var s = 0; s < kMeansData.length; s++) {
-            if (kMeansData[s][r] > max) {
-                max = kMeansData[s][r];
+        for (let recipe = 0; recipe < kMeansData.length; recipe++) {
+            if (kMeansData[recipe][ingredient] > max) {
+                max = kMeansData[recipe][ingredient];
             }
         }
         //Normalise data
-        for (var t = 0; t < kMeansData.length; t++) {
+        for (let recipe = 0; recipe < kMeansData.length; recipe++) {
             //Minimum in normalisation equation is 0 so no effect
-            kMeansData[t][r] = kMeansData[t][r] / max;
+            kMeansData[recipe][ingredient] = kMeansData[recipe][ingredient] / max;
         }
     }
     console.log(kMeansData);
@@ -177,26 +184,29 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
         }
     );
 
+    /**
+     * Algorithm Section 6 - Find duplicates
+     */
     console.log(clusters);
     //Find duplicate clusters
     var duplicates = [];
-    for (var u = 0; u < clusters.centroids.length; u++) {
-        if (clusters.centroids[u].size > 1) {
-            duplicates.push(u);
+    for (let cluster = 0; cluster < clusters.centroids.length; cluster++) {
+        if (clusters.centroids[cluster].size > 1) {
+            duplicates.push(cluster);
         }
     }
 
     //Remove duplicate elements
     if (duplicates.length > 0) {
-        for (var v = clusters.clusters.length - 1; v >= 0; v--) {
-            if (duplicates.includes(clusters.clusters[v]) && clusters.clusters[v] > -1) {
+        for (let cluster = clusters.clusters.length - 1; cluster >= 0; cluster--) {
+            if (duplicates.includes(clusters.clusters[cluster]) && clusters.clusters[cluster] > -1) {
                 var count = clusters.clusters.reduce(function (n, val) {
-                    return n + (val === clusters.clusters[v]);
+                    return n + (val === clusters.clusters[cluster]);
                 }, 0);
                 if (count > 1) {
                     //Remove recipe from array
-                    recipeScores.splice(v, 1);
-                    clusters.clusters[v] = -1;
+                    recipeScores.splice(cluster, 1);
+                    clusters.clusters[cluster] = -1;
                 }
                 console.log(clusters);
             }
