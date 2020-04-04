@@ -9,25 +9,36 @@ const create = require("./database/createRecord");
 const fetch = require("./database/fetchRecord");
 const update = require("./database/updateRecord");
 const unlink = require("./database/unlinkRecord");
-const search = require("./database/searchRecord");
+const search = require("./algorithm/search");
 const automate = require("./algorithm/automate");
 
 const spoonacular = require("./apis/spoonacular");
 
 app.post("/ingredient", function (req, res) {
     var parameters = req.body;
+    //Create ingredient and relationship nodes
     create.createIngredientNodes(parameters)
-    //Get the response from createNodesandRelationships
         .then(function (response) {
             var userResponse = response.data.results[0].data;
             var ingredientResponse = response.data.results[1].data;
             if (userResponse && ingredientResponse) {
-                return res.send("SUCCESS New ingredient node created for " + userResponse[0].row[0]['name'] + " which is " + ingredientResponse[0].row[0]['name']);
+                //If there are valid responses the front end will output saved
+                return res.send(
+                    "SUCCESS New ingredient node created for " +
+                    userResponse[0].row[0]['name'] +
+                    " which is " +
+                    ingredientResponse[0].row[0]['name']
+                );
             } else {
-                return res.send("ERROR creating ingredient node " + response.data.errors[0].code + " " + response.data.errors[0].message);
+                return res.send("" +
+                    "ERROR creating ingredient node " +
+                    response.data.errors[0].code +
+                    " " +
+                    response.data.errors[0].message);
             }
         })
         .catch(function (error) {
+            //Return error to front end which then gets displayed
             if (error) {
                 res.send("Error when creating ingredient " + error)
             }
