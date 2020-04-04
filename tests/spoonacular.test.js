@@ -1,4 +1,4 @@
-const spoonacular = require('../apis/spoonacular');
+const spoonacular = require('../api/spoonacular');
 
 test('spoonacular pull 1 main course', async () => {
     var response = await spoonacular.pullRecipes(1);

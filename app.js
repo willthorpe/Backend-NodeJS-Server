@@ -12,7 +12,7 @@ const unlink = require("./database/unlinkRecord");
 const search = require("./algorithm/search");
 const automate = require("./algorithm/automate");
 
-const spoonacular = require("./apis/spoonacular");
+const spoonacular = require("./api/spoonacular");
 
 app.post("/ingredient", function (req, res) {
     var parameters = req.body;

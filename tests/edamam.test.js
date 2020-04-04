@@ -1,4 +1,4 @@
-const edamam = require('../apis/edamam');
+const edamam = require('../api/edamam');
 
 test('edamam fetch with type grams', async () => {
     var nutrition = await edamam.fetchNutritionalInfo("chopped tomatoes", 400, "grams");
