@@ -13,7 +13,7 @@ function updateShoppingList(params) {
     for (var i = 0; i < ingredients.length; i++) {
         //Update link from user to ingredient
         statements.push({
-            "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount=$amount",
+            "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount=$amount + r.amount RETURN r",
             "parameters": {
                 "user": params.user,
                 "ingredient": ingredients[i].name,
@@ -27,7 +27,7 @@ function updateShoppingList(params) {
     });
 }
 
-//Update shopping list
+//Update ingredients
 function updateIngredients(params) {
     //Convert parameters to useful arrays
     var ingredients = JSON.parse(params.purchased);
@@ -38,7 +38,7 @@ function updateIngredients(params) {
     for (var i = 0; i < ingredients.length; i++) {
         //Update link from user to ingredient
         statements.push({
-            "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount= r.amount - $amount",
+            "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount= r.amount - $amount RETURN r",
             "parameters": {
                 "user": params.user,
                 "ingredient": ingredients[i].name,

@@ -67,7 +67,7 @@ beforeAll(() => {
             }
         ]
     });
-})
+});
 
 
 test('update shopping list', async () => {
@@ -78,5 +78,16 @@ test('update shopping list', async () => {
 
     var updated = await update.updateShoppingList(parameters);
     expect(updated.data.errors).toHaveLength(0);
+    expect(updated.data.results[0].data[0].row[0]['amount']).toBe(12);
+});
 
+test('update ingredients', async () => {
+    var parameters = {
+        'user': 'admin',
+        'purchased': '[{"name":"Chicken Breast","amount":5,"type":"number"}]'
+    };
+
+    var updated = await update.updateIngredients(parameters);
+    expect(updated.data.errors).toHaveLength(0);
+    expect(updated.data.results[0].data[0].row[0]['amount']).toBe(7);
 });
