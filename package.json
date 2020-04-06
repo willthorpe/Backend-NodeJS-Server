@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest && codecov"
+    "test": "jest --testTimeout=20000 && codecov"
   },
   "jest": {
     "coverageDirectory": "./coverage/",

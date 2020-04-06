@@ -43,13 +43,18 @@ test('create new recipe', async () => {
 });
 
 test('bulk create recipes', async () => {
-    var recipeResponse = await spoonacular.pullRecipes(1);
-    var recipeList = recipeResponse.data.recipes;
-    var response = await spoonacular.formatRecipes(1, recipeList);
-    var createResponse = await create.createRecipeNodesBulk(response);
-    var recipes = createResponse.data.results[0].data[0];
-    expect(recipes[0]['name']).toBeDefined();
-    expect(recipes[0]['servings']).toBeDefined();
-    expect(recipes[0]['cookTime']).toBeDefined();
-    expect(recipes[0]['prepTime']).toBeDefined();
+    var parameters = [{ 'name': 'Pan Seared Lamb Loin With Chimichurri & Roasted Trio Squash Salad With Goat Cheese and Pinenuts',
+        servings: 4,
+        prepTime: 10,
+        cookTime: 35,
+        ingredients: '[{"name":"extra virgin olive oil","amount":2,"type":"Tbsps"},{"name":"flat leaf parsley","amount":59.147,"type":"milliliters"},{"name":"garlic clove","amount":1,"type":""},{"name":"ground pepper","amount":4,"type":"servings"},{"name":"kosher salt","amount":4,"type":"servings"},{"name":"lamb loin chops","amount":4,"type":""},{"name":"lemon","amount":1,"type":""},{"name":"mint","amount":59.147,"type":"milliliters"},{"name":"pinenuts","amount":59.147,"type":"milliliters"},{"name":"red pepper flakes","amount":1,"type":"Tbsp"},{"name":"shallot","amount":1,"type":""}]',
+        methods: '["Preheat oven to 400F.For the Chimichurri, place all of the ingredients in a large bowl and incorporate together.  Season with salt and pepper.","Heat a large, heavy bottomed pan with the oil. Sprinkle  each side of the lamb loin evenly with salt and pepper.  (This cooking process is exactly like the way you make steak).  Once the oil is hot (it will smoke a little bit), sear the lamb loin, about 2 minutes per side and allow the lamb to cook the rest of the way in the oven. The cooking times are as follows:If you like your lamb rare, place it in the oven for no more than 2-3 minutes.  If you like your lamb medium rare place it in the oven for about 6-8 minutes.  If you like your lamb medium place it in the oven for 9 to 11 minutes. If you like it well done leave it in there for 12-14 minutes.  Remember, the lamb will continue to cook after you take it out so plan accordingly."]',
+        user: 'admin' }];
+
+    var createResponse = await create.createRecipeNodesBulk(parameters);
+    var recipes = createResponse.data.results;
+    expect(recipes[recipes.length - 1].data[0].row[1]['name']).toBeDefined();
+    expect(recipes[recipes.length - 1].data[0].row[1]['cookTime']).toBeDefined();
+    expect(recipes[recipes.length - 1].data[0].row[1]['prepTime']).toBeDefined();
+    expect(recipes[recipes.length - 1].data[0].row[1]['servings']).toBeDefined();
 });

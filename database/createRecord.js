@@ -212,7 +212,6 @@ async function fetchNutrition(ingredient, amount, type) {
     var tescoData = await tesco.fetchPriceData(ingredient, amount, type);
     tescoData = JSON.parse(tescoData);
     nutrition = nutrition.data;
-
     var ingredientParameters = {
         "name": ingredient,
         "calories": nutrition.calories,
