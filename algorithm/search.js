@@ -19,7 +19,6 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
             searchParameters[preference] = searchParameters[preference] / preferenceTotal
         }
     }
-
     /**
      * Algorithm Section 2 - Remove recipes with ingredients not matching allergies
      */
@@ -118,7 +117,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
 
         //Work out final score
         for (var parameter = 0; parameter < recipeScore.length; parameter++) {
-            recipeScore[parameter] *= searchParameters[parameter]
+            recipeScore[parameter] *= 100 * searchParameters[parameter]
         }
 
         //Add to score array
@@ -129,7 +128,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
             recipeNo: recipeDetails,
             method: methodList,
             ingredients: ingredientList,
-            score: 100 * Math.round(recipeScore.reduce((a, b) => a + b, 0))
+            score: Math.round(recipeScore.reduce((a, b) => a + b, 0))
         });
     }
     console.log(recipeScores);
@@ -150,7 +149,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
     }
     //Fill in blanks
     for (let recipe = 0; recipe < kMeansData.length; recipe++) {
-        for (let ingredient = 0; ingredient < kMeansData[ingredient].length; ingredient++) {
+        for (let ingredient = 0; ingredient < kMeansData[recipe].length; ingredient++) {
             if (kMeansData[recipe][ingredient] == null) {
                 kMeansData[recipe][ingredient] = 0;
             }
