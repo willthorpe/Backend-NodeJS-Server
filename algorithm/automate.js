@@ -17,7 +17,7 @@ function automateCalendar(preferences, recipes) {
             'name': recipes[recipe].row[0].name,
             'cookTime': recipes[recipe].row[0].cookTime,
             'prepTime': recipes[recipe].row[0].prepTime,
-            'totalTime': recipes[recipe].row[0].cookTime + recipes[recipe].row[0].prepTime,
+            'totalTime': parseInt(recipes[recipe].row[0].cookTime) + parseInt(recipes[recipe].row[0].prepTime),
             'tag': recipes[recipe].row[0].tag
         });
     }
@@ -36,7 +36,7 @@ function automateCalendar(preferences, recipes) {
             freeTimes = addToFreeTime(previousMidnight, start, freeTimes, preferences);
         }
 
-        var start = new Date(busyTimes[busyItem].end);
+        start = new Date(busyTimes[busyItem].end);
         var end = new Date(busyTimes[(busyItem + 1)].start);
 
         //If current event is strictly before new event
@@ -54,8 +54,8 @@ function automateCalendar(preferences, recipes) {
     } while (busyItem < busyTimes.length - 1);
 
     //Add free time from last event in the week until midnight
-    var start = freeTimes[freeTimes.length - 1].end;
-    var futureMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 23, 59, 59, 999);
+    start = freeTimes[freeTimes.length - 1].end;
+    futureMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 23, 59, 59, 999);
     //Add time until midnight to last event of the last day
     freeTimes = addToFreeTime(start, futureMidnight, freeTimes, preferences);
 
@@ -70,15 +70,18 @@ function automateCalendar(preferences, recipes) {
     var eatingTime = preferences.eatingTime;
 
     for (var k = 0; k < collatedRecipes.length; k++) {
-        if (collatedRecipes[k].tag === "breakfast") {
+        if (collatedRecipes[k].tag === "Breakfast") {
             //Breakfast meals
             findMealSlot("Breakfast", freeTimes, collatedRecipes[k], eatingTime);
-        } else if (collatedRecipes[k].tag === "lunch") {
+        } else if (collatedRecipes[k].tag === "Lunch") {
             //Lunch meals
             findMealSlot("Lunch", freeTimes, collatedRecipes[k], eatingTime);
-        } else {
+        } else if (collatedRecipes[k].tag === "Dinner") {
             //Dinner meals
-            findMealSlot("dinner", freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("Dinner", freeTimes, collatedRecipes[k], eatingTime);
+        } else if (collatedRecipes[k].tag === "Main Meal"){
+            findMealSlot("Lunch", freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("Dinner", freeTimes, collatedRecipes[k], eatingTime);
         }
     }
 
@@ -95,7 +98,7 @@ function automateCalendar(preferences, recipes) {
             freeTimes[slot] = '';
         } else {
             //If different day to the above
-            if (day != 0) {
+            if (day !== 0) {
                 collatedTimes.push(collatedSlot);
             }
             day = freeTimes[slot]['day'];
@@ -103,8 +106,8 @@ function automateCalendar(preferences, recipes) {
         }
     }
     //Add last day
+    console.log(collatedSlot);
     collatedTimes.push(collatedSlot);
-    console.log(collatedTimes);
 
     /**
      * Algorithm Part 4 - Best Fit Recipes in each slot
@@ -247,10 +250,9 @@ function findMealSlot(meal, freeTimes, recipe, eatingTime) {
  * @returns {*}
  */
 function bestFitMeals(mealCalendar, slot, meal, duplicates) {
-    console.log(mealCalendar);
     //If no meals
-    console.log(slot);
     if (slot != null && slot.length > 1) {
+        console.log("hello");
         //If multiple meals
         var bestTime = 9999;
         var bestMeal;
@@ -262,10 +264,11 @@ function bestFitMeals(mealCalendar, slot, meal, duplicates) {
                         occurrences++;
                     }
                 }
+                if(occurrences > 0){
+                    continue;
+                }
             }
-            if(occurrences > 0 && duplicates === false){
-                continue;
-            }
+
             if (slot[i]['plannedTime'] - slot[i]['totalTime'] < bestTime) {
                 bestTime = slot[i]['plannedTime'] - slot[i]['totalTime'];
                 bestMeal = slot[i]['name'];
