@@ -16,8 +16,8 @@ function formatRecipes(number, recipes) {
         var recipeInfo = {
             'name': recipes[i]['title'],
             'servings': recipes[i]['servings'],
-            'prepTime': recipes[i]['preparationMinutes'],
-            'cookTime': recipes[i]['cookingMinutes'],
+            'prepTime': (recipes[i]['preparationMinutes']) ? recipes[i]['preparationMinutes'] : 10,
+            'cookTime': (recipes[i]['cookingMinutes']) ? recipes[i]['cookingMinutes'] : recipes[i]['readyInMinutes'] - 10,
             'ingredients': [],
             'methods': [],
             'user':'admin'

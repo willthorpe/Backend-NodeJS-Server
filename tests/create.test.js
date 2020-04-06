@@ -1,4 +1,5 @@
 const create = require('../database/createRecord');
+const spoonacular = require('../api/spoonacular');
 
 test('edamam pull nutrition in create record', async () => {
     var ingredientParameters = await create.fetchNutrition("pineapple", 1, "number");
@@ -39,4 +40,16 @@ test('create new recipe', async () => {
     var recipeResponse = await create.createRecipeNodes(parameters);
     expect(recipeResponse.data.results[0].data[0].row[0]['name']).toBe('User');
     expect(recipeResponse.data.results[1].data[0].row[0]['name']).toBe('Literally Noodles');
+});
+
+test('bulk create recipes', async () => {
+    var recipeResponse = await spoonacular.pullRecipes(1);
+    var recipeList = recipeResponse.data.recipes;
+    var response = await spoonacular.formatRecipes(1, recipeList);
+    var createResponse = await create.createRecipeNodesBulk(response);
+    var recipes = createResponse.data.results[0].data[0];
+    expect(recipes[0]['name']).toBeDefined();
+    expect(recipes[0]['servings']).toBeDefined();
+    expect(recipes[0]['cookTime']).toBeDefined();
+    expect(recipes[0]['prepTime']).toBeDefined();
 });
