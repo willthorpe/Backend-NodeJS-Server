@@ -72,6 +72,28 @@ function updateIngredientAmounts(params) {
     });
 }
 
+//Update ingredients
+function updateRecipeSummary(params) {
+    //Array of statements that will be sent in the axios request
+    var statements = [];
+    statements.push({
+        "statement": "MATCH (r: Recipe) WHERE r.name=$name SET r.tag=$tag, r.servings=$servings, r.prepTime=$prepTime, r.cookTime=$cookTime RETURN r",
+        "parameters": {
+            "user": params.user,
+            "name": params.name,
+            "tag": params.tag,
+            "servings": params.servings,
+            "cookTime": params.cookTime,
+            "prepTime" : params.prepTime
+        }
+    });
+
+    return axios.post(config.url, {
+        "statements": statements,
+    });
+}
+
 module.exports.updateShoppingList = updateShoppingList;
 module.exports.updateIngredientAmounts = updateIngredientAmounts;
 module.exports.updateIngredient = updateIngredient;
+module.exports.updateRecipeSummary = updateRecipeSummary;

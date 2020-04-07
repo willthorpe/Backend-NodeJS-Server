@@ -318,6 +318,26 @@ app.patch("/ingredient/amount", function (req, res) {
         });
 });
 
+app.patch("/recipe/summary", function (req, res) {
+    var parameters = req.body;
+    //Unlink the recipe from the user - don't delete so it is still available in the search
+    update.updateRecipeSummary(parameters)
+    //Get the response from matchParameters
+        .then(function (response) {
+            var userResponse = response.data.results[0].data[0].row[0];
+            if (response.data.results[0].data || response.data.results[1].data) {
+                return res.send("SUCCESS recipe summary updated for " + userResponse['name']);
+            } else {
+                res.send("Error when updating recipe summary" + response.data.errors[0].code + " " + response.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when updating recipe summary " + error)
+            }
+        });
+});
+
 app.get("/search", function (req, res) {
     var parameters = req.query;
     var recipes = [];

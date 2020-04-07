@@ -106,3 +106,21 @@ test('update ingredient', async () => {
     expect(updated.data.errors).toHaveLength(0);
     expect(updated.data.results[0].data[0].row[0]['amount']).toBe(500);
 });
+
+test('update recipe summary', async () => {
+    var parameters = {
+        'user': 'admin',
+        'name': 'Just Chicken',
+        'tag' : 'Dinner',
+        'servings' : 8,
+        'cookTime' : 180,
+        'prepTime': 180
+    };
+
+    var updated = await update.updateIngredient(parameters);
+    expect(updated.data.errors).toHaveLength(0);
+    expect(updated.data.results[0].data[0].row[0]['servings']).toBe(8);
+    expect(updated.data.results[0].data[0].row[0]['cookTime']).toBe(180);
+    expect(updated.data.results[0].data[0].row[0]['prepTime']).toBe(180);
+
+});
