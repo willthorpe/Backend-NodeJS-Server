@@ -117,7 +117,7 @@ test('update recipe summary', async () => {
         'prepTime': 180
     };
 
-    var updated = await update.updateIngredient(parameters);
+    var updated = await update.updateRecipeSummary(parameters);
     expect(updated.data.errors).toHaveLength(0);
     expect(updated.data.results[0].data[0].row[0]['servings']).toBe(8);
     expect(updated.data.results[0].data[0].row[0]['cookTime']).toBe(180);
