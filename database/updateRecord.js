@@ -28,7 +28,27 @@ function updateShoppingList(params) {
 }
 
 //Update ingredients
-function updateIngredients(params) {
+function updateIngredient(params) {
+    //Array of statements that will be sent in the axios request
+    var statements = [];
+    statements.push({
+        "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount=$amount, r.type=$type, r.location=$location RETURN r",
+        "parameters": {
+            "user": params.user,
+            "ingredient": params.name,
+            "amount": params.amount,
+            "type": params.type,
+            "location": params.location
+        }
+    });
+
+    return axios.post(config.url, {
+        "statements": statements,
+    });
+}
+
+//Update ingredient amount
+function updateIngredientAmounts(params) {
     //Convert parameters to useful arrays
     var ingredients = JSON.parse(params.purchased);
 
@@ -53,4 +73,5 @@ function updateIngredients(params) {
 }
 
 module.exports.updateShoppingList = updateShoppingList;
-module.exports.updateIngredients = updateIngredients;
+module.exports.updateIngredientAmounts = updateIngredientAmounts;
+module.exports.updateIngredient = updateIngredient;

@@ -281,7 +281,27 @@ app.patch("/recipe", function (req, res) {
 app.patch("/ingredient", function (req, res) {
     var parameters = req.body;
     //Unlink the recipe from the user - don't delete so it is still available in the search
-    update.updateIngredients(parameters)
+    update.updateIngredient(parameters)
+    //Get the response from matchParameters
+        .then(function (response) {
+            var userResponse = response.data.results[0].data[0].row[0];
+            if (response.data.results[0].data || response.data.results[1].data) {
+                return res.send("SUCCESS ingredient  updated for " + userResponse['name']);
+            } else {
+                res.send("Error when updating ingredient " + response.data.errors[0].code + " " + response.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when updating ingredient  " + error)
+            }
+        });
+});
+
+app.patch("/ingredient/amount", function (req, res) {
+    var parameters = req.body;
+    //Unlink the recipe from the user - don't delete so it is still available in the search
+    update.updateIngredientAmounts(parameters)
     //Get the response from matchParameters
         .then(function (response) {
             var userResponse = response.data.results[0].data[0].row[0];

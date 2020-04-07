@@ -1,6 +1,7 @@
 const update = require('../database/updateRecord');
 const axios = require('axios').default;
 const config = require("../config");
+
 beforeAll(() => {
     return axios.post(config.url, {
         "statements": [
@@ -87,7 +88,21 @@ test('update ingredients', async () => {
         'purchased': '[{"name":"Chicken Breast","amount":5,"type":"number"}]'
     };
 
-    var updated = await update.updateIngredients(parameters);
+    var updated = await update.updateIngredientAmounts(parameters);
     expect(updated.data.errors).toHaveLength(0);
     expect(updated.data.results[0].data[0].row[0]['amount']).toBe(7);
+});
+
+test('update ingredient', async () => {
+    var parameters = {
+        'user': 'admin',
+        'name': 'Chicken Breast',
+        'amount' : 500,
+        'type' : 'number',
+        'location': 'Fridge'
+    };
+
+    var updated = await update.updateIngredient(parameters);
+    expect(updated.data.errors).toHaveLength(0);
+    expect(updated.data.results[0].data[0].row[0]['amount']).toBe(500);
 });
