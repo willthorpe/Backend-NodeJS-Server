@@ -82,12 +82,12 @@ function updateRecipeSummary(params) {
             "user": params.user,
             "name": params.name,
             "tag": params.tag,
-            "servings": params.servings,
-            "cookTime": params.cookTime,
-            "prepTime" : params.prepTime
+            "servings": parseInt(params.servings),
+            "cookTime": parseInt(params.cookTime),
+            "prepTime" : parseInt(params.prepTime)
         }
     });
-
+    console.log(statements);
     return axios.post(config.url, {
         "statements": statements,
     });
