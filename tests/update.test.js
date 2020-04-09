@@ -23,13 +23,12 @@ beforeAll(() => {
                 }
             },
             {
-                "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location, useByDate: $useByDate}] -> (i) return u, i",
+                "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location}] -> (i) return u, i",
                 "parameters": {
                     "user": "admin",
                     "ingredient": "Chicken Breast",
                     "amount": 2,
                     "type": "number",
-                    "useByDate": "19022020",
                     "location": "Fridge",
                 }
             },
@@ -122,5 +121,4 @@ test('update recipe summary', async () => {
     expect(updated.data.results[0].data[0].row[0]['servings']).toBe(8);
     expect(updated.data.results[0].data[0].row[0]['cookTime']).toBe(180);
     expect(updated.data.results[0].data[0].row[0]['prepTime']).toBe(180);
-
 });

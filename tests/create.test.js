@@ -17,7 +17,6 @@ test('create new ingredient', async () => {
         'type' : 'grams',
         'amount' : 600,
         'location' : 'cupboard',
-        'useByDate' : '20200210'
     };
 
     var ingredientResponse = await create.createIngredientNodes(parameters);

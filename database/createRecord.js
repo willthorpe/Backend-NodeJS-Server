@@ -16,7 +16,7 @@ async function createIngredientNodes(params) {
     statements = createIngredient(params.name, ingredientParameters, statements);
 
     //Create link from user to ingredient
-    statements = createIngredientUserRelationships(params.user, params.name, params.amount, params.type, params.useByDate, params.location, statements);
+    statements = createIngredientUserRelationships(params.user, params.name, params.amount, params.type, params.location, statements);
 
     return axios.post(config.url, {
         "statements": statements,
@@ -46,7 +46,7 @@ async function createRecipeNodes(params) {
             var ingredientParameters = await fetchNutrition(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["type"]);
             //Double check ingredient created
             statements = createIngredient(ingredients[i]["name"], ingredientParameters, statements);
-            statements = createIngredientUserRelationships(params.user, ingredients[i]["name"], 0, ingredients[i]["type"], '', '', statements);
+            statements = createIngredientUserRelationships(params.user, ingredients[i]["name"], 0, ingredients[i]["type"], '', statements);
 
             //Add links to recipe
             statements = createIngredientRecipeRelationships(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["type"], params.name, ingredientParameters, statements);
@@ -103,7 +103,7 @@ function createRecipeUserLink(params, userIngredients) {
     for (var i = 0; i < ingredients.length; i++) {
         found = false;
         if(userIngredients == null){
-            statements = createIngredientUserRelationships(params.user, ingredients[i][0]["name"], 0, ingredients[i][1]["type"],"","", statements);
+            statements = createIngredientUserRelationships(params.user, ingredients[i][0]["name"], 0, ingredients[i][1]["type"],"",statements);
         }else{
             for (var j = 0; j < userIngredients.length; j++) {
                 if (ingredients[i][0]["name"] === userIngredients.data[j].row[0].name) {
@@ -111,7 +111,7 @@ function createRecipeUserLink(params, userIngredients) {
                 }
             }
             if (found === false) {
-                statements = createIngredientUserRelationships(params.user, ingredients[i][0]["name"], 0, ingredients[i][1]["type"],"","", statements);
+                statements = createIngredientUserRelationships(params.user, ingredients[i][0]["name"], 0, ingredients[i][1]["type"],"",statements);
             }
         }
     }
@@ -161,15 +161,14 @@ function createRecipe(params, statements){
     return statements;
 }
 
-function createIngredientUserRelationships(user, ingredient, amount, type, useByDate, location, statements){
+function createIngredientUserRelationships(user, ingredient, amount, type, location, statements){
     statements.push({
-        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient MERGE(u)- [r: has] -> (i) set r.amount = COALESCE(r.amount,0) + $amount, r.type=$type, r.location=$location, r.useByDate='' RETURN u, i",
+        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient MERGE(u)- [r: has] -> (i) set r.amount = COALESCE(r.amount,0) + $amount, r.type=$type, r.location=$location RETURN u, i",
         "parameters": {
             "user": user,
             "ingredient": ingredient,
             "amount": parseInt(amount),
             "type": type,
-            "useByDate": useByDate,
             "location": location,
         }
     });
