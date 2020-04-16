@@ -50,7 +50,7 @@ function updateIngredient(params) {
 //Update ingredient amount
 function updateIngredientAmounts(params) {
     //Convert parameters to useful arrays
-    var ingredients = JSON.parse(params.purchased);
+    var ingredients = JSON.parse(params.ingredients);
 
     //Array of statements that will be sent in the axios request
     var statements = [];
