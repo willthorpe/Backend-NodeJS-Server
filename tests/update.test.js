@@ -84,7 +84,7 @@ test('update shopping list', async () => {
 test('update ingredients', async () => {
     var parameters = {
         'user': 'admin',
-        'purchased': '[{"name":"Chicken Breast","amount":5,"type":"number"}]'
+        'ingredients': '[{"name":"Chicken Breast","amount":5,"type":"number"}]'
     };
 
     var updated = await update.updateIngredientAmounts(parameters);
