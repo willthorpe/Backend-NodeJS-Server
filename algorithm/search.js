@@ -8,7 +8,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
     var kMeansLabels = [];
 
     /**
-     * Algorithm Section 1 - Calculate parameter ratios
+     * Algorithm Part 1 - Calculate parameter ratios
      */
     //Calculate preference weighting compared to other preferences
     for (let preference = 0; preference < searchParameters.length; preference++) {
@@ -20,7 +20,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
         }
     }
     /**
-     * Algorithm Section 2 - Remove recipes with ingredients not matching allergies
+     * Algorithm Part 2 - Remove recipes with ingredients not matching allergies
      */
     for (var recipeNo = 0; recipeNo < recipes[0].data.length; recipeNo++) {
         kMeansData.push([]);
@@ -49,7 +49,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
         }
 
         /**
-         * Algorithm Section 3 - Calculate scores relating to ingredient weights
+         * Algorithm Part 3 - Calculate scores relating to ingredient weights
          */
         for (let ingredientNo = 0; ingredientNo < recipes[0].data[recipeNo].row[1].length; ingredientNo++) {
             //Check Prefer Lighter Weight - 1
@@ -91,7 +91,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
         }
 
         /**
-         * Algorithm Section 4 - Calculate scores not relating to ingredient weights
+         * Algorithm Part 4 - Calculate scores not relating to ingredient weights
          */
             //Check Popular Recipes - 3
         var popularity = recipes[1].data[0].row[0];
@@ -125,7 +125,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
         var methodList = JSON.parse(recipes[0].data[recipeNo].row[0].method);
         var ingredientList = recipes[0].data[recipeNo].row[1];
         recipeScores.push({
-            recipeNo: recipeDetails,
+            recipe: recipeDetails,
             method: methodList,
             ingredients: ingredientList,
             score: Math.round(recipeScore.reduce((a, b) => a + b, 0))
@@ -138,7 +138,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
     });
 
     /**
-     * Algorithm Section 5 - kMeans Clustering to pick highest of similar recipes
+     * Algorithm Part 5 - kMeans Clustering to pick highest of similar recipes
      */
     //Prepare Data - fill in blanks
     //Make arrays same length
@@ -184,7 +184,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
     );
 
     /**
-     * Algorithm Section 6 - Find duplicates
+     * Algorithm Part 6 - Find duplicates
      */
     console.log(clusters);
     //Find duplicate clusters
