@@ -109,7 +109,9 @@ function fetchShoppingList(params) {
     //Form statements
     for (var l = 0; l < recipes.length; l++) {
         statements.push({
-            "statement": "MATCH (u:User)-[p:has]->(i:Ingredient)<-[r:contains]-(re:Recipe) WHERE u.name=$user and re.name=$recipe RETURN i,toInteger(r.amount)*$number, p.amount, p.type",
+            "statement": "MATCH (u:User)-[p:has]->(i:Ingredient)<-[r:contains]-(re:Recipe) " +
+                "WHERE u.name=$user and re.name=$recipe " +
+                "RETURN i,toInteger(r.amount)*$number, p.amount, p.type",
             "parameters": {
                 "user": user,
                 "recipe": recipes[l]["recipe"],

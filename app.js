@@ -6,7 +6,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 const create = require("./database/createRecord");
-const fetch = require("./database/fetchRecord");
+const fetch = require("./database/matchRecord");
 const update = require("./database/updateRecord");
 const unlink = require("./database/unlinkRecord");
 const search = require("./algorithm/search");
@@ -122,7 +122,6 @@ app.get("/ingredient", function (req, res) {
                         'amount': data[i]['row'][1]['amount'],
                         'type': data[i]['row'][1]['type'],
                         'location': data[i]['row'][1]['location'],
-                        'useByDate': data[i]['row'][1]['useByDate']
                     });
                 }
                 return res.send(responseData);
@@ -258,8 +257,28 @@ app.get("/list", function (req, res) {
         });
 });
 
-app.patch("/recipe", function (req, res) {
-    var parameters = req.body;
+app.delete("/ingredient", function (req, res) {
+    var parameters = req.query;
+    //Unlink the ingredient from the user - don't delete so it is still available in the search
+    unlink.deleteIngredient(parameters)
+    //Get the response from matchParameters
+        .then(function (response) {
+            var userResponse = response.data.results[0].data[0].row[0];
+            if (response.data.results[0].data || response.data.results[1].data) {
+                return res.send("SUCCESS Ingredient deleted for " + userResponse['name']);
+            } else {
+                res.send("Error when deleting ingredient" + response.data.errors[0].code + " " + response.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when deleting ingredient " + error)
+            }
+        });
+});
+
+app.delete("/recipe", function (req, res) {
+    var parameters = req.query;
     //Unlink the recipe from the user - don't delete so it is still available in the search
     unlink.deleteRecipe(parameters)
     //Get the response from matchParameters
@@ -280,7 +299,7 @@ app.patch("/recipe", function (req, res) {
 
 app.patch("/ingredient", function (req, res) {
     var parameters = req.body;
-    //Unlink the recipe from the user - don't delete so it is still available in the search
+    //Update the ingredient
     update.updateIngredient(parameters)
     //Get the response from matchParameters
         .then(function (response) {
@@ -300,7 +319,7 @@ app.patch("/ingredient", function (req, res) {
 
 app.patch("/ingredient/amount", function (req, res) {
     var parameters = req.body;
-    //Unlink the recipe from the user - don't delete so it is still available in the search
+    //Update only the amount field for the ingredient
     update.updateIngredientAmounts(parameters)
     //Get the response from matchParameters
         .then(function (response) {
