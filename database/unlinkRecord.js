@@ -9,7 +9,7 @@ function deleteIngredient(params) {
                 "statement": "MATCH (u:User {name:$user})-[r:has]-(i:Ingredient {name:$ingredient}) DELETE r RETURN u",
                 "parameters": {
                     "user": params.user,
-                    "ingredient": params.name
+                    "ingredient": params.ingredient
                 }
             },
         ],
@@ -24,7 +24,7 @@ function deleteRecipe(params) {
                 "statement": "MATCH (u:User {name:$user})-[r:makes]-(re:Recipe {name:$recipe}) DELETE r RETURN u",
                 "parameters": {
                     "user": params.user,
-                    "recipe": params.name
+                    "recipe": params.recipe
                 }
             },
         ],

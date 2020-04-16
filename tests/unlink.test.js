@@ -72,7 +72,7 @@ beforeAll(() => {
 test('unlink recipe', async () => {
     var parameters = {
         'user': "admin",
-        'name': "Just Chicken"
+        'recipe': "Just Chicken"
     };
 
     var recipeUnlink = await unlink.deleteRecipe(parameters);
