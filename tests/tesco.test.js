@@ -3,7 +3,7 @@ const tesco = require('../api/tesco');
 test('tesco fetch with type grams', async () => {
     var tescoData = await tesco.fetchPriceData("chopped tomatoes", 400, "grams");
     tescoData = JSON.parse(tescoData);
-    expect(tescoData.uk.ghs.products.results[0].price).toBe(0.35);
+    expect(tescoData.uk.ghs.products.results[0].price).toBe(0.80);
 });
 
 test('tesco fetch with type number', async () => {
