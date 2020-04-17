@@ -1,4 +1,4 @@
-const fetch = require('../database/fetchRecord');
+const match = require('../database/matchRecord');
 const axios = require('axios').default;
 const config = require("../config");
 
@@ -70,7 +70,7 @@ beforeAll(() => {
 })
 
 test('fetch ingredients for user', async () => {
-    var response = await fetch.fetchIngredients('admin');
+    var response = await match.fetchIngredients('admin');
     var data = response.data.results[0].data;
     var responseData = [{
         'name': data[0]['row'][0]['name'],
@@ -85,7 +85,7 @@ test('fetch ingredients for user', async () => {
 });
 
 test('fetch recipes for user', async () => {
-    var response = await fetch.fetchRecipes('admin');
+    var response = await match.fetchRecipes('admin');
     var data = response.data.results[0].data;
     var responseData = [{
         'recipeName': data[0]['row'][0]['name'],
@@ -102,7 +102,7 @@ test('fetch recipes for user', async () => {
 });
 
 test('fetch recipe just chicken', async () => {
-    var response = await fetch.fetchRecipe('Just Chicken');
+    var response = await match.fetchRecipe('Just Chicken');
     var data = response.data.results[0].data;
     var responseData = [{
         'recipeName': data[0]['row'][0]['name'],
@@ -123,7 +123,7 @@ test('fetch shopping list', async () => {
         'user': "admin",
         'calendar': '[{"id": 1, "breakfast": ["Just Chicken","Just Chicken","Just Chicken","Just Chicken","Just Chicken","Just Chicken"], "lunch":[], "dinner":[]}]'
     }
-    var response = await fetch.fetchShoppingList(parameters);
+    var response = await match.fetchShoppingList(parameters);
     var data = response.data.results[0].data;
     var responseData = [{
         'name': data[0]['row'][0]['name'],

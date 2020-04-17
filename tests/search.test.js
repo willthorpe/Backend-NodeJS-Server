@@ -1,5 +1,5 @@
 const search = require('../algorithm/search');
-const fetch = require('../database/fetchRecord');
+const match = require('../database/matchRecord');
 const axios = require('axios').default;
 const config = require("../config");
 
@@ -72,9 +72,9 @@ beforeAll(() => {
 
 
 test('recipe search', async () => {
-    var recipeResponse = await fetch.fetchAllRecipes();
+    var recipeResponse = await match.fetchAllRecipes();
     var recipes = recipeResponse.data.results;
-    var ingredientResponse = await fetch.fetchIngredients('admin');
+    var ingredientResponse = await match.fetchIngredients('admin');
 
     var parameters = {
         'search': '[0.9, 0.5, 0.3, 0.7, 0.1, 0.3, 0.8, 1]',
