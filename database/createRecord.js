@@ -163,7 +163,7 @@ function createRecipe(params, statements){
 
 function createIngredientUserRelationships(user, ingredient, amount, type, location, statements){
     statements.push({
-        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient MERGE(u)- [r: has] -> (i) set r.amount = COALESCE(r.amount,0) + $amount, r.type=$type, r.location=$location RETURN u, i",
+        "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient MERGE(u)- [r: has] -> (i) ON CREATE SET r.amount=$amount, r.type=$type, r.location=$location RETURN u, i",
         "parameters": {
             "user": user,
             "ingredient": ingredient,
