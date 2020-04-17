@@ -152,9 +152,9 @@ function createRecipe(params, statements){
         "parameters": {
             "name": params.name,
             "tag": params.tag,
-            "servings": params.servings,
-            "prepTime": params.prepTime,
-            "cookTime": params.cookTime,
+            "servings": parseInt(params.servings),
+            "prepTime": parseInt(params.prepTime),
+            "cookTime": parseInt(params.cookTime),
             "method": params.methods
         }
     });
