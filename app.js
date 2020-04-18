@@ -361,7 +361,7 @@ app.get("/search", function (req, res) {
     var parameters = req.query;
     var recipes = [];
     //Return results for the user query
-    fetch.fetchAllRecipes()
+    fetch.fetchAllRecipes(parameters.user)
         .then(function (fetchResponse) {
             recipes = fetchResponse.data.results;
             return fetch.fetchIngredients(parameters.user);

@@ -30,14 +30,17 @@ function fetchRecipe(recipe) {
 }
 
 //Fetch all the recipes
-function fetchAllRecipes() {
+function fetchAllRecipes(user) {
     return axios.post(config.url, {
         "statements": [
             {
-                "statement": "MATCH (re:Recipe)-[r:contains]-> (i:Ingredient) RETURN distinct re,collect([i,r])"
+                "statement": "MATCH (u:User)-[m:makes]->(re:Recipe)-[r:contains]-> (i:Ingredient) where u.name <> $user RETURN distinct re,collect([i,r])",
+                "parameters": {
+                    "user": user,
+                }
             },
             {
-                "statement": "MATCH (u:User)-[r:makes]->(re:Recipe) RETURN count(r)"
+                "statement": "MATCH (re:Recipe)<-[r:makes]->(u:User) RETURN re,count(r)"
             },
         ],
     })

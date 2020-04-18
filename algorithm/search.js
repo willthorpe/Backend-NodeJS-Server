@@ -94,7 +94,7 @@ function searchRecipe(userIngredients, recipes, searchParameters, diets, allergi
          * Algorithm Part 4 - Calculate scores not relating to ingredient weights
          */
             //Check Popular Recipes - 3
-        var popularity = recipes[1].data[0].row[0];
+        var popularity = recipes[1].data[recipeNo].row[1];
         recipeScore[3] += popularity / 50;
 
         //Check Prefer Less Ingredients - 4
