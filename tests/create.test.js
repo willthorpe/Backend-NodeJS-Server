@@ -21,7 +21,7 @@ test('create new ingredient', async () => {
 
     var ingredientResponse = await create.createIngredientNodes(parameters);
     expect(ingredientResponse.data.results[0].data[0].row[0]['name']).toBe('User');
-    expect(ingredientResponse.data.results[1].data[0].row[0]['name']).toBe('Noodles');
+    expect(ingredientResponse.data.results[1].data[0].row[0]['name']).toBe('noodles');
 });
 
 test('create new recipe', async () => {
@@ -38,7 +38,7 @@ test('create new recipe', async () => {
 
     var recipeResponse = await create.createRecipeNodes(parameters);
     expect(recipeResponse.data.results[0].data[0].row[0]['name']).toBe('User');
-    expect(recipeResponse.data.results[1].data[0].row[0]['name']).toBe('Literally Noodles');
+    expect(recipeResponse.data.results[1].data[0].row[0]['name']).toBe('literally noodles');
 });
 
 test('bulk create recipes', async () => {
