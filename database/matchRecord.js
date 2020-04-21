@@ -6,7 +6,7 @@ function fetchIngredients(user) {
     return axios.post(config.url, {
         "statements": [
             {
-                "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user RETURN i,r ORDER BY i.name",
+                "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and r.amount > 0 RETURN i,r ORDER BY i.name",
                 "parameters": {
                     "user": user,
                 }
