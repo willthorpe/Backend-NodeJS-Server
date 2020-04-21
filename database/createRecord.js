@@ -162,9 +162,12 @@ function createRecipe(params, statements){
 }
 
 function createIngredientUserRelationships(user, ingredient, amount, type, location, statements){
+    //If the ingredient is part of the recipe that the user does not already store
     if(location==="" && amount === 0){
         statements.push({
-            "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient MERGE(u)- [r: has] -> (i) set r.amount = COALESCE(r.amount,0) + $amount, r.type=$type, r.location=$location RETURN u, i",
+            "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient " +
+                "MERGE(u)- [r: has] -> (i) set r.amount = COALESCE(r.amount,0) + $amount, r.type=$type, r.location=$location " +
+                "RETURN u, i",
             "parameters": {
                 "user": user,
                 "ingredient": ingredient.toLowerCase(),
@@ -174,8 +177,11 @@ function createIngredientUserRelationships(user, ingredient, amount, type, locat
             }
         });
     }else{
+        //Edit or update existing ingredient
         statements.push({
-            "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient MERGE(u)- [r: has] -> (i) set r.amount=$amount, r.type=$type, r.location=$location RETURN u, i",
+            "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient " +
+                "MERGE(u)- [r: has] -> (i) set r.amount=$amount, r.type=$type, r.location=$location " +
+                "RETURN u, i",
             "parameters": {
                 "user": user,
                 "ingredient": ingredient.toLowerCase(),
@@ -190,7 +196,10 @@ function createIngredientUserRelationships(user, ingredient, amount, type, locat
 
 function createIngredientRecipeRelationships(ingredient, amount, type, recipe, parameters, statements){
     statements.push({
-        "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe MERGE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein, price:$price}] -> (i) return i, re",
+        "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe " +
+            "MERGE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, " +
+            "energy:$energy, fat:$fat, carbs:$carbs, protein:$protein, price:$price}] -> (i) " +
+            "return i, re",
         "parameters": {
             "ingredient": ingredient.toLowerCase(),
             "recipe": recipe.toLowerCase(),
@@ -260,3 +269,6 @@ module.exports.createRecipeNodes = createRecipeNodes;
 module.exports.createRecipeNodesBulk = createRecipeNodesBulk;
 module.exports.createRecipeUserLink = createRecipeUserLink;
 module.exports.fetchNutrition = fetchNutrition;
+module.exports.createIngredient = createIngredient;
+module.exports.createIngredientUserRelationships = createIngredientUserRelationships;
+module.exports.createIngredientRecipeRelationships = createIngredientRecipeRelationships;

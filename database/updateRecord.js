@@ -1,6 +1,6 @@
-
 const axios = require('axios').default;
 const config = require("../config");
+const create = require("createRecord");
 
 //Update shopping list
 function updateShoppingList(params) {
@@ -110,17 +110,25 @@ function updateRecipeMethod(params) {
 }
 
 //Update recipe method
-function updateRecipeIngredients(params) {
+async function updateRecipeIngredients(params)  {
+    var ingredients = JSON.parse(params.ingredients);
+
     //Array of statements that will be sent in the axios request
     var statements = [];
-    statements.push({
-        "statement": "MATCH (r: Recipe{name:$name}) set r.method=$method",
-        "parameters": {
-            "user": params.user,
-            "name": params.name,
-            "method": params.method,
+
+    //Create links from recipe to ingredients
+    for (var i = 0; i < ingredients.length; i++) {
+        if (ingredients[i] != null) {
+            var ingredientParameters = await create.fetchNutrition(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["type"]);
+            //Double check ingredient created
+            statements = create.createIngredient(ingredients[i]["name"], ingredientParameters, statements);
+            statements = create.createIngredientUserRelationships(params.user, ingredients[i]["name"], 0, ingredients[i]["type"], '', statements);
+
+            //Add links to recipe
+            statements = create.createIngredientRecipeRelationships(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["type"], params.name, ingredientParameters, statements);
         }
-    });
+    }
+
     return axios.post(config.url, {
         "statements": statements,
     });
