@@ -1,6 +1,6 @@
 const axios = require('axios').default;
 const config = require("../config");
-const create = require("createRecord");
+const create = require("../database/createRecord");
 
 //Update shopping list
 function updateShoppingList(params) {
