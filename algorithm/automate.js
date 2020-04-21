@@ -63,25 +63,22 @@ function automateCalendar(preferences, recipes) {
      * Algorithm Part 3 - Find Slots for Meals in Calendar
      */
 
-    //Add through best fit - randomise recipes at the start
-    collatedRecipes = shuffle(collatedRecipes);
-
     //var weekFrequency = preferences.weekFrequency;
     var eatingTime = preferences.eatingTime;
 
     for (var k = 0; k < collatedRecipes.length; k++) {
         if (collatedRecipes[k].tag === "Breakfast") {
             //Breakfast meals
-            findMealSlot("Breakfast", freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("breakfast", freeTimes, collatedRecipes[k], eatingTime);
         } else if (collatedRecipes[k].tag === "Lunch") {
             //Lunch meals
-            findMealSlot("Lunch", freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("lunch", freeTimes, collatedRecipes[k], eatingTime);
         } else if (collatedRecipes[k].tag === "Dinner") {
             //Dinner meals
-            findMealSlot("Dinner", freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("dinner", freeTimes, collatedRecipes[k], eatingTime);
         } else if (collatedRecipes[k].tag === "Main Meal"){
-            findMealSlot("Lunch", freeTimes, collatedRecipes[k], eatingTime);
-            findMealSlot("Dinner", freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("lunch", freeTimes, collatedRecipes[k], eatingTime);
+            findMealSlot("dinner", freeTimes, collatedRecipes[k], eatingTime);
         }
     }
 
@@ -127,13 +124,13 @@ function automateCalendar(preferences, recipes) {
         });
 
         //Breakfast
-        mealCalendar = bestFitMeals(mealCalendar, collatedTimes[calendarDay]['breakfastMeals'], 'breakfast', breakfast[2]);
+        mealCalendar = bestFitMeals(mealCalendar, shuffle(collatedTimes[calendarDay]['breakfastMeals']), 'breakfast', breakfast[2]);
 
         //Lunch
-        mealCalendar = bestFitMeals(mealCalendar, collatedTimes[calendarDay]['lunchMeals'], 'lunch', lunch[2]);
+        mealCalendar = bestFitMeals(mealCalendar, shuffle(collatedTimes[calendarDay]['lunchMeals']), 'lunch', lunch[2]);
 
         //Dinner
-        mealCalendar = bestFitMeals(mealCalendar, collatedTimes[calendarDay]['dinnerMeals'], 'dinner', dinner[2]);
+        mealCalendar = bestFitMeals(mealCalendar, shuffle(collatedTimes[calendarDay]['dinnerMeals']), 'dinner', dinner[2]);
 
     }
 
@@ -160,7 +157,7 @@ function addToFreeTime(start, end, freeTimes, preferences) {
     var lunchMinutes = calculateFreeMinutes(start, end, lunch);
     var dinnerMinutes = calculateFreeMinutes(start, end, dinner);
 
-    //Push to free time events
+    //Push to free time array
     freeTimes.push({
         'start': start,
         'end': end,
@@ -250,15 +247,14 @@ function findMealSlot(meal, freeTimes, recipe, eatingTime) {
  * @returns {*}
  */
 function bestFitMeals(mealCalendar, slot, meal, duplicates) {
-    //If no meals
     if (slot != null && slot.length > 1) {
-        console.log("hello");
         //If multiple meals
-        var bestTime = 9999;
-        var bestMeal;
+        var bestTime = 9999; //The least wasted time for the meal slot
+        var bestMeal; //The current chosen meal for the slot.
         for (var i = 0; i < slot.length; i++) {
             var occurrences = 0;
             if (duplicates === false) {
+                //If no duplicates, count occurrences and make sure it is only one.
                 for (var j = 0; j < mealCalendar.length; j++) {
                     if(mealCalendar[j][meal] === slot[i]['name']){
                         occurrences++;
@@ -269,11 +265,13 @@ function bestFitMeals(mealCalendar, slot, meal, duplicates) {
                 }
             }
 
+            //Find the time the meal needs and set it as meal if better than the last meal
             if (slot[i]['plannedTime'] - slot[i]['totalTime'] < bestTime) {
                 bestTime = slot[i]['plannedTime'] - slot[i]['totalTime'];
                 bestMeal = slot[i]['name'];
             }
         }
+        //Add meal to meal calendar
         if(bestMeal != null){
             mealCalendar[mealCalendar.length - 1][meal] = bestMeal;
         }
