@@ -131,4 +131,4 @@ module.exports.updateIngredientAmounts = updateIngredientAmounts;
 module.exports.updateIngredient = updateIngredient;
 module.exports.updateRecipeSummary = updateRecipeSummary;
 module.exports.updateRecipeMethod = updateRecipeMethod;
-module.exports.updateRecipeIngredients = updateRecipeIngredients();
+module.exports.updateRecipeIngredients = updateRecipeIngredients;
