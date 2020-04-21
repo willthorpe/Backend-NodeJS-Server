@@ -357,6 +357,46 @@ app.patch("/recipe/summary", function (req, res) {
         });
 });
 
+app.patch("/recipe/method", function (req, res) {
+    var parameters = req.body;
+    //Unlink the recipe from the user - don't delete so it is still available in the search
+    update.updateRecipeMethod(parameters)
+    //Get the response from matchParameters
+        .then(function (response) {
+            var userResponse = response.data.results[0].data[0].row[0];
+            if (response.data.results[0].data || response.data.results[1].data) {
+                return res.send("SUCCESS recipe method updated for " + userResponse['name']);
+            } else {
+                res.send("Error when updating recipe method" + response.data.errors[0].code + " " + response.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when updating recipe method " + error)
+            }
+        });
+});
+
+app.patch("/recipe/ingredients", function (req, res) {
+    var parameters = req.body;
+    //Unlink the recipe from the user - don't delete so it is still available in the search
+    update.updateRecipeIngredients(parameters)
+    //Get the response from matchParameters
+        .then(function (response) {
+            var userResponse = response.data.results[0].data[0].row[0];
+            if (response.data.results[0].data || response.data.results[1].data) {
+                return res.send("SUCCESS recipe ingredients updated for " + userResponse['name']);
+            } else {
+                res.send("Error when updating recipe ingredients" + response.data.errors[0].code + " " + response.data.errors[0].message);
+            }
+        })
+        .catch(function (error) {
+            if (error) {
+                res.send("Error when updating recipe ingredients " + error)
+            }
+        });
+});
+
 app.get("/search", function (req, res) {
     var parameters = req.query;
     var recipes = [];

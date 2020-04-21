@@ -72,12 +72,12 @@ function updateIngredientAmounts(params) {
     });
 }
 
-//Update ingredients
+//Update recipe summary
 function updateRecipeSummary(params) {
     //Array of statements that will be sent in the axios request
     var statements = [];
     statements.push({
-        "statement": "MATCH (r: Recipe) WHERE r.name=$name SET r.tag=$tag, r.servings=$servings, r.prepTime=$prepTime, r.cookTime=$cookTime RETURN r",
+        "statement": "MATCH (r: Recipe{name:$name}) set r.tag=$tag, r.servings=$servings, r.prepTime=$prepTime, r.cookTime=$cookTime RETURN r",
         "parameters": {
             "user": params.user,
             "name": params.name,
@@ -87,7 +87,40 @@ function updateRecipeSummary(params) {
             "prepTime" : parseInt(params.prepTime)
         }
     });
-    console.log(statements);
+    return axios.post(config.url, {
+        "statements": statements,
+    });
+}
+
+//Update recipe method
+function updateRecipeMethod(params) {
+    //Array of statements that will be sent in the axios request
+    var statements = [];
+    statements.push({
+        "statement": "MATCH (r: Recipe{name:$name}) set r.method=$method",
+        "parameters": {
+            "user": params.user,
+            "name": params.name,
+            "method": params.method,
+        }
+    });
+    return axios.post(config.url, {
+        "statements": statements,
+    });
+}
+
+//Update recipe method
+function updateRecipeIngredients(params) {
+    //Array of statements that will be sent in the axios request
+    var statements = [];
+    statements.push({
+        "statement": "MATCH (r: Recipe{name:$name}) set r.method=$method",
+        "parameters": {
+            "user": params.user,
+            "name": params.name,
+            "method": params.method,
+        }
+    });
     return axios.post(config.url, {
         "statements": statements,
     });
@@ -97,3 +130,5 @@ module.exports.updateShoppingList = updateShoppingList;
 module.exports.updateIngredientAmounts = updateIngredientAmounts;
 module.exports.updateIngredient = updateIngredient;
 module.exports.updateRecipeSummary = updateRecipeSummary;
+module.exports.updateRecipeMethod = updateRecipeMethod;
+module.exports.updateRecipeIngredients = updateRecipeIngredients();
