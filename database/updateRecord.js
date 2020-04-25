@@ -3,7 +3,7 @@ const config = require("../config");
 const create = require("../database/createRecord");
 
 //Update shopping list
-function updateShoppingList(params) {
+async function updateShoppingList(params) {
     //Convert parameters to useful arrays
     var ingredients = JSON.parse(params.purchased);
 
@@ -11,13 +11,16 @@ function updateShoppingList(params) {
     var statements = [];
 
     for (var i = 0; i < ingredients.length; i++) {
+        var parameters = await create.fetchNutrition(ingredients[i]['name'], ingredients[i]['amount'], ingredients[i]['type']);
+
         //Update link from user to ingredient
         statements.push({
             "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount=$amount + r.amount RETURN r",
             "parameters": {
                 "user": params.user,
                 "ingredient": ingredients[i].name,
-                "amount": ingredients[i].amount
+                "amount": ingredients[i].amount,
+                "price": parameters.price,
             }
         });
     }
