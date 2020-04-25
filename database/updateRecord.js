@@ -66,7 +66,7 @@ async function updateIngredientAmounts(params) {
                 "user": params.user,
                 "ingredient": ingredients[i].name,
                 "amount": ingredients[i].amount,
-                "price": parameters[i].price,
+                "price": parameters.price,
             }
         });
     }
