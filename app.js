@@ -241,7 +241,8 @@ app.get("/list", function (req, res) {
                         responseData.push({
                             'name': data[i]['row'][0]['name'],
                             'amount': amount,
-                            'type': data[i]['row'][3]
+                            'type': data[i]['row'][3],
+                            'price': data[i]['row'][4] - data[i]['row'][5]
                         });
                     }
                 }
