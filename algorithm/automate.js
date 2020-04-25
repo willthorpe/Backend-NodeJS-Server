@@ -117,9 +117,9 @@ function automateCalendar(preferences, recipes) {
 
     for (var calendarDay = 0; calendarDay < collatedTimes.length; calendarDay++) {
         mealCalendar.push({
-            'breakfast': '',
-            'lunch': '',
-            'dinner': '',
+            'breakfast': 'EMPTY',
+            'lunch': 'EMPTY',
+            'dinner': 'EMPTY',
             'day': collatedTimes[calendarDay]['day']
         });
 
