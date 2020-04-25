@@ -28,8 +28,9 @@ function updateShoppingList(params) {
 }
 
 //Update ingredients
-function updateIngredient(params) {
+async function updateIngredient(params) {
     //Array of statements that will be sent in the axios request
+    var parameters = await create.fetchNutrition(params.name, params.amount, params.type);
     var statements = [];
     statements.push({
         "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount=$amount, r.type=$type, r.location=$location RETURN r",
@@ -38,6 +39,7 @@ function updateIngredient(params) {
             "ingredient": params.name,
             "amount": params.amount,
             "type": params.type,
+            "price": parameters.price,
             "location": params.location
         }
     });
@@ -48,7 +50,7 @@ function updateIngredient(params) {
 }
 
 //Update ingredient amount
-function updateIngredientAmounts(params) {
+async function updateIngredientAmounts(params) {
     //Convert parameters to useful arrays
     var ingredients = JSON.parse(params.ingredients);
 
@@ -56,13 +58,15 @@ function updateIngredientAmounts(params) {
     var statements = [];
 
     for (var i = 0; i < ingredients.length; i++) {
+        var parameters = await create.fetchNutrition(ingredients[i]['name'], ingredients[i]['amount'], ingredients[i]['type']);
         //Update link from user to ingredient
         statements.push({
             "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount= r.amount - $amount RETURN r",
             "parameters": {
                 "user": params.user,
                 "ingredient": ingredients[i].name,
-                "amount": ingredients[i].amount
+                "amount": ingredients[i].amount,
+                "price": parameters[i].price,
             }
         });
     }
@@ -122,7 +126,7 @@ async function updateRecipeIngredients(params)  {
             var ingredientParameters = await create.fetchNutrition(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["type"]);
             //Double check ingredient created
             statements = create.createIngredient(ingredients[i]["name"], ingredientParameters, statements);
-            statements = create.createIngredientUserRelationships(params.user, ingredients[i]["name"], 0, ingredients[i]["type"], '', statements);
+            statements = create.createIngredientUserRelationships(params.user, ingredients[i]["name"], 0, ingredients[i]["type"], '', ingredientParameters, statements);
 
             //Add links to recipe
             statements = create.createIngredientRecipeRelationships(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["type"], params.name, ingredientParameters, statements);
