@@ -168,7 +168,7 @@ function createIngredientUserRelationships(user, ingredient, amount, type, locat
     if (location === "" && amount === 0) {
         statements.push({
             "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient " +
-                "MERGE(u)- [r: has] -> (i) set r.amount = COALESCE(r.amount,0) + $amount, r.type=$type, r.location=$location " +
+                "MERGE(u)- [r: has] -> (i) set r.amount = COALESCE(r.amount,0) + $amount, r.type=$type, r.location=$location, r.price=$price" +
                 "RETURN u, i",
             "parameters": {
                 "user": user,
@@ -183,7 +183,7 @@ function createIngredientUserRelationships(user, ingredient, amount, type, locat
         //Edit or update existing ingredient
         statements.push({
             "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient " +
-                "MERGE(u)- [r: has] -> (i) set r.amount=$amount, r.type=$type, r.location=$location " +
+                "MERGE(u)- [r: has] -> (i) set r.amount=$amount, r.type=$type, r.location=$location, r.price=$price " +
                 "RETURN u, i",
             "parameters": {
                 "user": user,

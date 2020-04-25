@@ -15,7 +15,7 @@ async function updateShoppingList(params) {
 
         //Update link from user to ingredient
         statements.push({
-            "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount=$amount + r.amount RETURN r",
+            "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount=$amount + r.amount, r.price=$price RETURN r",
             "parameters": {
                 "user": params.user,
                 "ingredient": ingredients[i].name,
@@ -36,7 +36,7 @@ async function updateIngredient(params) {
     var parameters = await create.fetchNutrition(params.name, params.amount, params.type);
     var statements = [];
     statements.push({
-        "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount=$amount, r.type=$type, r.location=$location RETURN r",
+        "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount=$amount, r.type=$type, r.location=$location, r.price=$price RETURN r",
         "parameters": {
             "user": params.user,
             "ingredient": params.name,
@@ -64,7 +64,7 @@ async function updateIngredientAmounts(params) {
         var parameters = await create.fetchNutrition(ingredients[i]['name'], ingredients[i]['amount'], ingredients[i]['type']);
         //Update link from user to ingredient
         statements.push({
-            "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount= r.amount - $amount RETURN r",
+            "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount= r.amount - $amount, r.price = $price RETURN r",
             "parameters": {
                 "user": params.user,
                 "ingredient": ingredients[i].name,
