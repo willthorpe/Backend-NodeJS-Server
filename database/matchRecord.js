@@ -114,7 +114,7 @@ function fetchShoppingList(params) {
         statements.push({
             "statement": "MATCH (u:User)-[p:has]->(i:Ingredient)<-[r:contains]-(re:Recipe) " +
                 "WHERE u.name=$user and re.name=$recipe " +
-                "RETURN i,toInteger(r.amount)*$number, p.amount, p.type",
+                "RETURN i,toInteger(r.amount)*$number, p.amount, p.type, toInteger(r.price)*$number, p.price",
             "parameters": {
                 "user": user,
                 "recipe": recipes[l]["recipe"],
