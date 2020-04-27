@@ -13,6 +13,7 @@ function pullRecipes(number) {
 function formatRecipes(number, recipes) {
     var newRecipes = [];
     for (var i = 0; i < number; i++) {
+        //For each recipe map the API data to the graph database parameters
         var recipeInfo = {
             'name': recipes[i]['title'],
             'servings': recipes[i]['servings'],
@@ -22,6 +23,7 @@ function formatRecipes(number, recipes) {
             'methods': [],
             'user':'admin'
         };
+        //Fetch each ingredient and format data into name, amount/type triples
         for (var j = 0; j < recipes[i]['extendedIngredients'].length; j++) {
             recipeInfo['ingredients'].push(
                 {
@@ -31,6 +33,7 @@ function formatRecipes(number, recipes) {
                 }
             )
         }
+        //Fetch the method by line one by one
         for (var k = 0; k < recipes[i]['analyzedInstructions'][0]['steps'].length; k++) {
             recipeInfo['methods'].push(
                 recipes[i]['analyzedInstructions'][0]['steps'][k]['step']
