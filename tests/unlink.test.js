@@ -23,12 +23,12 @@ beforeAll(() => {
                 }
             },
             {
-                "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location}] -> (i) return u, i",
+                "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, measurement: $measurement, location: $location}] -> (i) return u, i",
                 "parameters": {
                     "user": "admin",
                     "ingredient": "Chicken Breast",
                     "amount": 2,
-                    "type": "number",
+                    "measurement": "number",
                     "location": "Fridge",
                 }
             },
@@ -51,12 +51,12 @@ beforeAll(() => {
                 }
             },
             {
-                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein}] -> (i) return i, re",
+                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, measurement: $measurement,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein}] -> (i) return i, re",
                 "parameters": {
                     "ingredient": "Chicken Breast",
                     "recipe": "Just Chicken",
                     "amount": 1,
-                    "type": "number",
+                    "measurement": "number",
                     "weight": 174.0,
                     "calories": 299,
                     "energy": 299.28,

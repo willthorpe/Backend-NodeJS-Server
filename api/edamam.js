@@ -1,8 +1,8 @@
 const axios = require('axios').default;
 const config = require("../config");
 
-function fetchNutritionalInfo(ingredient, amount, type) {
-    if (type === "number") {
+function fetchNutritionalInfo(ingredient, amount, measurement) {
+    if (measurement === "number") {
         return axios.get(config.edamam_url
             + "?app_id=" + config.edamam_app_id
             + "&app_key=" + config.edamam_app_key
@@ -11,7 +11,7 @@ function fetchNutritionalInfo(ingredient, amount, type) {
         return axios.get(config.edamam_url
             + "?app_id=" + config.edamam_app_id
             + "&app_key=" + config.edamam_app_key
-            + "&ingr=" + amount + " " + type + " " + ingredient);
+            + "&ingr=" + amount + " " + measurement + " " + ingredient);
     }
 }
 

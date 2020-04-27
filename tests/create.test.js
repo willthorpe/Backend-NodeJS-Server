@@ -14,7 +14,7 @@ test('create new ingredient', async () => {
     var parameters = {
         'user' : 'User',
         'name' : 'Noodles',
-        'type' : 'grams',
+        'measurement' : 'grams',
         'amount' : 600,
         'location' : 'cupboard',
     };
@@ -33,7 +33,7 @@ test('create new recipe', async () => {
         'prepTime' : 10,
         'tag': 'Dinner',
         'methods': '["Boil pasta"]',
-        'ingredients': '[{ "name": "Noodles", "amount": 300, "type": "grams" }]'
+        'ingredients': '[{ "name": "Noodles", "amount": 300, "measurement": "grams" }]'
     };
 
     var recipeResponse = await create.createRecipeNodes(parameters);
@@ -46,7 +46,7 @@ test('bulk create recipes', async () => {
         servings: 4,
         prepTime: 10,
         cookTime: 35,
-        ingredients: '[{"name":"extra virgin olive oil","amount":2,"type":"Tbsps"},{"name":"flat leaf parsley","amount":59.147,"type":"milliliters"},{"name":"garlic clove","amount":1,"type":""},{"name":"ground pepper","amount":4,"type":"servings"},{"name":"kosher salt","amount":4,"type":"servings"},{"name":"lamb loin chops","amount":4,"type":""},{"name":"lemon","amount":1,"type":""},{"name":"mint","amount":59.147,"type":"milliliters"},{"name":"pinenuts","amount":59.147,"type":"milliliters"},{"name":"red pepper flakes","amount":1,"type":"Tbsp"},{"name":"shallot","amount":1,"type":""}]',
+        ingredients: '[{"name":"extra virgin olive oil","amount":2,"measurement":"Tbsps"},{"name":"flat leaf parsley","amount":59.147,"measurement":"milliliters"},{"name":"garlic clove","amount":1,"measurement":""},{"name":"ground pepper","amount":4,"measurement":"servings"},{"name":"kosher salt","amount":4,"measurement":"servings"},{"name":"lamb loin chops","amount":4,"measurement":""},{"name":"lemon","amount":1,"measurement":""},{"name":"mint","amount":59.147,"measurement":"milliliters"},{"name":"pinenuts","amount":59.147,"measurement":"milliliters"},{"name":"red pepper flakes","amount":1,"measurement":"Tbsp"},{"name":"shallot","amount":1,"measurement":""}]',
         methods: '["Preheat oven to 400F.For the Chimichurri, place all of the ingredients in a large bowl and incorporate together.  Season with salt and pepper.","Heat a large, heavy bottomed pan with the oil. Sprinkle  each side of the lamb loin evenly with salt and pepper.  (This cooking process is exactly like the way you make steak).  Once the oil is hot (it will smoke a little bit), sear the lamb loin, about 2 minutes per side and allow the lamb to cook the rest of the way in the oven. The cooking times are as follows:If you like your lamb rare, place it in the oven for no more than 2-3 minutes.  If you like your lamb medium rare place it in the oven for about 6-8 minutes.  If you like your lamb medium place it in the oven for 9 to 11 minutes. If you like it well done leave it in there for 12-14 minutes.  Remember, the lamb will continue to cook after you take it out so plan accordingly."]',
         user: 'admin' }];
 

@@ -12,11 +12,11 @@ async function createIngredientNodes(params) {
     statements = createUser(params.user, statements);
 
     //Create ingredient
-    var ingredientParameters = await fetchNutrition(params.name, params.amount, params.type);
+    var ingredientParameters = await fetchNutrition(params.name, params.amount, params.measurement);
     statements = createIngredient(params.name, ingredientParameters, statements);
 
     //Create link from user to ingredient
-    statements = createIngredientUserRelationships(params.user, params.name, params.amount, params.type, params.location, ingredientParameters, statements);
+    statements = createIngredientUserRelationships(params.user, params.name, params.amount, params.measurement, params.location, ingredientParameters, statements);
 
     return axios.post(config.url, {
         "statements": statements,
@@ -43,13 +43,13 @@ async function createRecipeNodes(params) {
     //Create links from recipe to ingredients
     for (var i = 0; i < ingredients.length; i++) {
         if (ingredients[i] != null) {
-            var ingredientParameters = await fetchNutrition(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["type"]);
+            var ingredientParameters = await fetchNutrition(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["measurement"]);
             //Double check ingredient created
             statements = createIngredient(ingredients[i]["name"], ingredientParameters, statements);
-            statements = createIngredientUserRelationships(params.user, ingredients[i]["name"], 0, ingredients[i]["type"], '', ingredientParameters, statements);
+            statements = createIngredientUserRelationships(params.user, ingredients[i]["name"], 0, ingredients[i]["measurement"], '', ingredientParameters, statements);
 
             //Add links to recipe
-            statements = createIngredientRecipeRelationships(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["type"], params.name, ingredientParameters, statements);
+            statements = createIngredientRecipeRelationships(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["measurement"], params.name, ingredientParameters, statements);
         }
     }
     return axios.post(config.url, {
@@ -74,7 +74,7 @@ async function createRecipeNodesBulk(recipes) {
         var ingredientParametersList = [];
         //Add ingredients if not already in database
         for (var j = 0; j < ingredients.length; j++) {
-            var ingredientParameters = await fetchNutrition(ingredients[j].name, ingredients[j].amount, ingredients[j].type);
+            var ingredientParameters = await fetchNutrition(ingredients[j].name, ingredients[j].amount, ingredients[j].measurement);
             ingredientParametersList.push(ingredientParameters);
             statements = createIngredient(ingredients[j]["name"], ingredientParameters, statements);
         }
@@ -86,7 +86,7 @@ async function createRecipeNodesBulk(recipes) {
         //Create links from recipe to ingredients
         for (var k = 0; k < ingredients.length; k++) {
             statements = createIngredientRecipeRelationships(ingredients[k]["name"], ingredients[k]["amount"],
-                ingredients[k]["type"], recipes[i].name, ingredientParametersList[k], statements);
+                ingredients[k]["measurement"], recipes[i].name, ingredientParametersList[k], statements);
         }
     }
     return axios.post(config.url, {
@@ -105,7 +105,7 @@ function createRecipeUserLink(params, userIngredients) {
     for (var i = 0; i < ingredients.length; i++) {
         found = false;
         if (userIngredients == null) {
-            statements = createIngredientUserRelationships(params.user, ingredients[i][0]["name"], 0, ingredients[i][1]["type"], "", {'price': 0}, statements);
+            statements = createIngredientUserRelationships(params.user, ingredients[i][0]["name"], 0, ingredients[i][1]["measurement"], "", {'price': 0}, statements);
         } else {
             for (var j = 0; j < userIngredients.length; j++) {
                 if (ingredients[i][0]["name"] === userIngredients.data[j].row[0].name) {
@@ -113,7 +113,7 @@ function createRecipeUserLink(params, userIngredients) {
                 }
             }
             if (found === false) {
-                statements = createIngredientUserRelationships(params.user, ingredients[i][0]["name"], 0, ingredients[i][1]["type"], "", {'price': 0}, statements);
+                statements = createIngredientUserRelationships(params.user, ingredients[i][0]["name"], 0, ingredients[i][1]["measurement"], "", {'price': 0}, statements);
             }
         }
     }
@@ -163,18 +163,18 @@ function createRecipe(params, statements) {
     return statements;
 }
 
-function createIngredientUserRelationships(user, ingredient, amount, type, location, parameters, statements) {
+function createIngredientUserRelationships(user, ingredient, amount, measurement, location, parameters, statements) {
     //If the ingredient is part of the recipe that the user does not already store
     if (location === "" && amount === 0) {
         statements.push({
             "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient " +
-                "MERGE(u)- [r: has] -> (i) set r.amount = COALESCE(r.amount,0) + $amount, r.type=$type, r.location=$location, r.price=$price" +
+                "MERGE(u)- [r: has] -> (i) set r.amount = COALESCE(r.amount,0) + $amount, r.measurement=$measurement, r.location=$location, r.price=$price" +
                 "RETURN u, i",
             "parameters": {
                 "user": user,
                 "ingredient": ingredient.toLowerCase(),
                 "amount": parseInt(amount),
-                "type": type,
+                "measurement": measurement,
                 "price": parameters.price,
                 "location": location,
             }
@@ -183,13 +183,13 @@ function createIngredientUserRelationships(user, ingredient, amount, type, locat
         //Edit or update existing ingredient
         statements.push({
             "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient " +
-                "MERGE(u)- [r: has] -> (i) set r.amount=$amount, r.type=$type, r.location=$location, r.price=$price " +
+                "MERGE(u)- [r: has] -> (i) set r.amount=$amount, r.measurement=$measurement, r.location=$location, r.price=$price " +
                 "RETURN u, i",
             "parameters": {
                 "user": user,
                 "ingredient": ingredient.toLowerCase(),
                 "amount": parseInt(amount),
-                "type": type,
+                "measurement": measurement,
                 "price": parameters.price,
                 "location": location,
             }
@@ -198,17 +198,17 @@ function createIngredientUserRelationships(user, ingredient, amount, type, locat
     return statements;
 }
 
-function createIngredientRecipeRelationships(ingredient, amount, type, recipe, parameters, statements) {
+function createIngredientRecipeRelationships(ingredient, amount, measurement, recipe, parameters, statements) {
     statements.push({
         "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe " +
-            "MERGE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, " +
+            "MERGE(re)- [r: contains { amount: $amount, measurement: $measurement,weight:$weight, calories:$calories, " +
             "energy:$energy, fat:$fat, carbs:$carbs, protein:$protein, price:$price}] -> (i) " +
             "return i, re",
         "parameters": {
             "ingredient": ingredient.toLowerCase(),
             "recipe": recipe.toLowerCase(),
             "amount": parseInt(amount),
-            "type": type,
+            "measurement": measurement,
             "price": parameters.price,
             "weight": parameters.weight,
             "calories": parameters.calories,
@@ -232,9 +232,9 @@ function createRecipeUserRelationships(user, recipe, statements) {
     return statements;
 }
 
-async function fetchNutrition(ingredient, amount, type) {
-    var nutrition = await edamam.fetchNutritionalInfo(ingredient, amount, type);
-    var tescoData = await tesco.fetchPriceData(ingredient, amount, type);
+async function fetchNutrition(ingredient, amount, measurement) {
+    var nutrition = await edamam.fetchNutritionalInfo(ingredient, amount, measurement);
+    var tescoData = await tesco.fetchPriceData(ingredient, amount, measurement);
     tescoData = JSON.parse(tescoData);
     nutrition = nutrition.data;
     var ingredientParameters = {

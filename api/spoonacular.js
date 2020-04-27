@@ -23,13 +23,13 @@ function formatRecipes(number, recipes) {
             'methods': [],
             'user':'admin'
         };
-        //Fetch each ingredient and format data into name, amount/type triples
+        //Fetch each ingredient and format data into name, amount/measurement triples
         for (var j = 0; j < recipes[i]['extendedIngredients'].length; j++) {
             recipeInfo['ingredients'].push(
                 {
                     'name': recipes[i]['extendedIngredients'][j]['name'],
                     'amount': recipes[i]['extendedIngredients'][j]['measures']['metric']['amount'],
-                    'type': recipes[i]['extendedIngredients'][j]['measures']['metric']['unitLong'],
+                    'measurement': recipes[i]['extendedIngredients'][j]['measures']['metric']['unitLong'],
                 }
             )
         }

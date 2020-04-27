@@ -47,16 +47,22 @@ app.post("/ingredient", function (req, res) {
 
 app.post("/recipe", function (req, res) {
     var parameters = req.body;
-    //Check if the user and recipe already exists in the app
+    //Create the nodes and relationships for the recipe if they do not already exist
     create.createRecipeNodes(parameters)
-    //Get the response from createNodesandRelationships
+    //Get the response from createRecipeNodes
         .then(function (response) {
             var userResponse = response.data.results[0].data;
             var recipeResponse = response.data.results[1].data;
             if (userResponse && recipeResponse) {
-                return res.send("SUCCESS New recipe node created for " + userResponse[0].row[0]['name'] + " which is " + recipeResponse[0].row[0]['name']);
+                return res.send("SUCCESS New recipe node created for " +
+                    userResponse[0].row[0]['name'] +
+                    " which is " +
+                    recipeResponse[0].row[0]['name']);
             } else {
-                return res.send("ERROR creating recipe node " + response.data.errors[0].code + " " + response.data.errors[0].message);
+                return res.send("ERROR creating recipe node " +
+                    response.data.errors[0].code +
+                    " " +
+                    response.data.errors[0].message);
             }
         })
         .catch(function (error) {
@@ -120,7 +126,7 @@ app.get("/ingredient", function (req, res) {
                     responseData.push({
                         'name': data[i]['row'][0]['name'],
                         'amount': data[i]['row'][1]['amount'],
-                        'type': data[i]['row'][1]['type'],
+                        'measurement': data[i]['row'][1]['measurement'],
                         'location': data[i]['row'][1]['location'],
                     });
                 }
@@ -158,7 +164,7 @@ app.get("/nextRecipe", function (req, res) {
                     {
                         'name': ingredientResponse[2]['name'],
                         'amount': ingredientResponse[1]['amount'],
-                        'type': ingredientResponse[1]['type'],
+                        'measurement': ingredientResponse[1]['measurement'],
                         'weight': ingredientResponse[1]['weight'],
                         'calories': ingredientResponse[1]['calories'],
                         'energy': ingredientResponse[1]['energy'],
@@ -204,7 +210,7 @@ app.get("/recipe", function (req, res) {
                         responseData[index]['ingredients'].push({
                             'name': ingredients[j][0]['name'],
                             'amount': ingredients[j][1]['amount'],
-                            'type': ingredients[j][1]['type'],
+                            'measurement': ingredients[j][1]['measurement'],
                             "weight": ingredients[j][1]['weight'],
                             "calories": ingredients[j][1]['calories'],
                             "energy": ingredients[j][1]['energy'],
@@ -241,7 +247,7 @@ app.get("/list", function (req, res) {
                         responseData.push({
                             'name': data[i]['row'][0]['name'],
                             'amount': amount,
-                            'type': data[i]['row'][3],
+                            'measurement': data[i]['row'][3],
                             'price': (data[i]['row'][4] - data[i]['row'][5]).toFixed(2)
                         });
                     }

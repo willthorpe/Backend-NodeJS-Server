@@ -23,12 +23,12 @@ beforeAll(() => {
                 }
             },
             {
-                "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, type: $type, location: $location}] -> (i) return u, i",
+                "statement": "MATCH (u:User),(i:Ingredient) WHERE u.name=$user and i.name=$ingredient CREATE(u)- [r: has { amount: $amount, measurement: $measurement, location: $location}] -> (i) return u, i",
                 "parameters": {
                     "user": "admin",
                     "ingredient": "Chicken Breast",
                     "amount": 2,
-                    "type": "number",
+                    "measurement": "number",
                     "location": "Fridge",
                 }
             },
@@ -51,12 +51,12 @@ beforeAll(() => {
                 }
             },
             {
-                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, type: $type,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein}] -> (i) return i, re",
+                "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe CREATE(re)- [r: contains { amount: $amount, measurement: $measurement,weight:$weight, calories:$calories, energy:$energy, fat:$fat, carbs:$carbs, protein:$protein}] -> (i) return i, re",
                 "parameters": {
                     "ingredient": "Chicken Breast",
                     "recipe": "Just Chicken",
                     "amount": 1,
-                    "type": "number",
+                    "measurement": "number",
                     "weight": 174.0,
                     "calories": 299,
                     "energy": 299.28,
@@ -75,12 +75,12 @@ test('fetch ingredients for user', async () => {
     var responseData = [{
         'name': data[0]['row'][0]['name'],
         'amount': data[0]['row'][1]['amount'],
-        'type': data[0]['row'][1]['type'],
+        'measurement': data[0]['row'][1]['measurement'],
         'location': data[0]['row'][1]['location'],
     }];
     expect(responseData[0]['name']).toBe('Chicken Breast');
     expect(responseData[0]['amount']).toBe(2);
-    expect(responseData[0]['type']).toBe('number');
+    expect(responseData[0]['measurement']).toBe('number');
     expect(responseData[0]['location']).toBe('Fridge');
 });
 
@@ -92,13 +92,13 @@ test('fetch recipes for user', async () => {
         'servings': data[0]['row'][0]['servings'],
         'name': data[0]['row'][1][0][0]['name'],
         'amount': data[0]['row'][1][0][1]['amount'],
-        'type': data[0]['row'][1][0][1]['type'],
+        'measurement': data[0]['row'][1][0][1]['measurement'],
     }];
     expect(responseData[0]['recipeName']).toBe('Just Chicken');
     expect(responseData[0]['servings']).toBe(2);
-    expect(responseData[0]['name']).toBe('Chicken Breast');
+    expect(responseData[0]['measurement']).toBe('Chicken Breast');
     expect(responseData[0]['amount']).toBe(1);
-    expect(responseData[0]['type']).toBe('number');
+    expect(responseData[0]['measurement']).toBe('number');
 });
 
 test('fetch recipe just chicken', async () => {
@@ -109,13 +109,13 @@ test('fetch recipe just chicken', async () => {
         'servings': data[0]['row'][0]['servings'],
         'name': data[0]['row'][2]['name'],
         'amount': data[0]['row'][1]['amount'],
-        'type': data[0]['row'][1]['type'],
+        'measurement': data[0]['row'][1]['measurement'],
     }];
     expect(responseData[0]['recipeName']).toBe('Just Chicken');
     expect(responseData[0]['servings']).toBe(2);
     expect(responseData[0]['name']).toBe('Chicken Breast');
     expect(responseData[0]['amount']).toBe(1);
-    expect(responseData[0]['type']).toBe('number');
+    expect(responseData[0]['measurement']).toBe('number');
 });
 
 test('fetch shopping list', async () => {
@@ -128,9 +128,9 @@ test('fetch shopping list', async () => {
     var responseData = [{
         'name': data[0]['row'][0]['name'],
         'amount': data[0]['row'][1] - data[0]['row'][2],
-        'type': data[0]['row'][3],
+        'measurement': data[0]['row'][3],
     }];
     expect(responseData[0]['name']).toBe('Chicken Breast');
     expect(responseData[0]['amount']).toBe(4);
-    expect(responseData[0]['type']).toBe('number');
+    expect(responseData[0]['measurement']).toBe('number');
 });
