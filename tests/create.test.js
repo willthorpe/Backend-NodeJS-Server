@@ -2,7 +2,7 @@ const create = require('../database/createRecord');
 const spoonacular = require('../api/spoonacular');
 
 test('edamam pull nutrition in create record', async () => {
-    var ingredientParameters = await create.fetchNutrition("pineapple", 1, "number");
+    var ingredientParameters = await create.fetchIngredientInfo("pineapple", 1, "number");
     expect(ingredientParameters["energy"]).toBe(452.50000000000006);
     expect(ingredientParameters["fat"]).toBe(1.086);
     expect(ingredientParameters["carbs"]).toBe(118.736);

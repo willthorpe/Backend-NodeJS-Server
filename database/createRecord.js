@@ -12,11 +12,17 @@ async function createIngredientNodes(params) {
     statements = createUser(params.user, statements);
 
     //Create ingredient
-    var ingredientParameters = await fetchNutrition(params.name, params.amount, params.measurement);
-    statements = createIngredient(params.name, ingredientParameters, statements);
+    var ingredientParameters = await fetchIngredientInfo(
+        params.name, params.amount, params.measurement
+    );
+    statements = createIngredient(
+        params.name, ingredientParameters, statements
+    );
 
     //Create link from user to ingredient
-    statements = createIngredientUserRelationships(params.user, params.name, params.amount, params.measurement, params.location, ingredientParameters, statements);
+    statements = createIngredientUserRelationships(
+        params.user, params.name, params.amount, params.measurement, params.location, ingredientParameters, statements
+    );
 
     return axios.post(config.url, {
         "statements": statements,
@@ -43,7 +49,7 @@ async function createRecipeNodes(params) {
     //Create links from recipe to ingredients
     for (var i = 0; i < ingredients.length; i++) {
         if (ingredients[i] != null) {
-            var ingredientParameters = await fetchNutrition(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["measurement"]);
+            var ingredientParameters = await fetchIngredientInfo(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["measurement"]);
             //Double check ingredient created
             statements = createIngredient(ingredients[i]["name"], ingredientParameters, statements);
             statements = createIngredientUserRelationships(params.user, ingredients[i]["name"], 0, ingredients[i]["measurement"], '', ingredientParameters, statements);
@@ -74,7 +80,7 @@ async function createRecipeNodesBulk(recipes) {
         var ingredientParametersList = [];
         //Add ingredients if not already in database
         for (var j = 0; j < ingredients.length; j++) {
-            var ingredientParameters = await fetchNutrition(ingredients[j].name, ingredients[j].amount, ingredients[j].measurement);
+            var ingredientParameters = await fetchIngredientInfo(ingredients[j].name, ingredients[j].amount, ingredients[j].measurement);
             ingredientParametersList.push(ingredientParameters);
             statements = createIngredient(ingredients[j]["name"], ingredientParameters, statements);
         }
@@ -232,7 +238,7 @@ function createRecipeUserRelationships(user, recipe, statements) {
     return statements;
 }
 
-async function fetchNutrition(ingredient, amount, measurement) {
+async function fetchIngredientInfo(ingredient, amount, measurement) {
     var nutrition = await edamam.fetchNutritionalInfo(ingredient, amount, measurement);
     var tescoData = await tesco.fetchPriceData(ingredient, amount, measurement);
     tescoData = JSON.parse(tescoData);
@@ -272,7 +278,7 @@ module.exports.createIngredientNodes = createIngredientNodes;
 module.exports.createRecipeNodes = createRecipeNodes;
 module.exports.createRecipeNodesBulk = createRecipeNodesBulk;
 module.exports.createRecipeUserLink = createRecipeUserLink;
-module.exports.fetchNutrition = fetchNutrition;
+module.exports.fetchIngredientInfo = fetchIngredientInfo;
 module.exports.createIngredient = createIngredient;
 module.exports.createIngredientUserRelationships = createIngredientUserRelationships;
 module.exports.createIngredientRecipeRelationships = createIngredientRecipeRelationships;

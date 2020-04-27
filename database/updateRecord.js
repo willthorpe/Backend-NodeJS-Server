@@ -11,7 +11,7 @@ async function updateShoppingList(params) {
     var statements = [];
 
     for (var i = 0; i < ingredients.length; i++) {
-        var parameters = await create.fetchNutrition(ingredients[i]['name'], ingredients[i]['amount'], ingredients[i]['measurement']);
+        var parameters = await create.fetchIngredientInfo(ingredients[i]['name'], ingredients[i]['amount'], ingredients[i]['measurement']);
 
         //Update link from user to ingredient
         statements.push({
@@ -33,7 +33,7 @@ async function updateShoppingList(params) {
 //Update ingredients
 async function updateIngredient(params) {
     //Array of statements that will be sent in the axios request
-    var parameters = await create.fetchNutrition(params.name, params.amount, params.measurement);
+    var parameters = await create.fetchIngredientInfo(params.name, params.amount, params.measurement);
     var statements = [];
     statements.push({
         "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount=$amount, r.measurement=$measurement, r.location=$location, r.price=$price RETURN r",
@@ -61,7 +61,7 @@ async function updateIngredientAmounts(params) {
     var statements = [];
 
     for (var i = 0; i < ingredients.length; i++) {
-        var parameters = await create.fetchNutrition(ingredients[i]['name'], ingredients[i]['amount'], ingredients[i]['measurement']);
+        var parameters = await create.fetchIngredientInfo(ingredients[i]['name'], ingredients[i]['amount'], ingredients[i]['measurement']);
         //Update link from user to ingredient
         statements.push({
             "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and i.name=$ingredient SET r.amount= r.amount - $amount, r.price = $price RETURN r",
@@ -126,7 +126,7 @@ async function updateRecipeIngredients(params)  {
     //Create links from recipe to ingredients
     for (var i = 0; i < ingredients.length; i++) {
         if (ingredients[i] != null) {
-            var ingredientParameters = await create.fetchNutrition(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["measurement"]);
+            var ingredientParameters = await create.fetchIngredientInfo(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["measurement"]);
             //Double check ingredient created
             statements = create.createIngredient(ingredients[i]["name"], ingredientParameters, statements);
             statements = create.createIngredientUserRelationships(params.user, ingredients[i]["name"], 0, ingredients[i]["measurement"], '', ingredientParameters, statements);
