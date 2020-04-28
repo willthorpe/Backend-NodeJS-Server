@@ -1,4 +1,4 @@
-# The serverside code for the meal planning app
+# The serverside code for the meal planning app final year project
 
 The server handles most of the computation for the app through its API that the frontend connects to.
 
