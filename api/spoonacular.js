@@ -1,6 +1,11 @@
 const axios = require('axios').default;
 const config = require("../config");
 
+/**
+ * Pull random recipes from Spoonacular API
+ * @param number
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 function pullRecipes(number) {
     return axios.get(
         config.spoonacular_url
@@ -10,6 +15,12 @@ function pullRecipes(number) {
     );
 }
 
+/**
+ * Convert from Spoonacular recipes to recipes for the application
+ * @param number
+ * @param recipes
+ * @returns {[]}
+ */
 function formatRecipes(number, recipes) {
     var newRecipes = [];
     for (var i = 0; i < number; i++) {

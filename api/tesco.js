@@ -1,6 +1,13 @@
 var TescoAPI = require("tesco-api-node");
 const config = require("../config");
 
+/**
+ * Fetch UK price data from Tesco API
+ * @param ingredient
+ * @param amount
+ * @param measurement
+ * @returns {*|Promise|Promise<unknown>}
+ */
 function fetchPriceData(ingredient, amount, measurement) {
     var tesco = new TescoAPI(config.tesco_primary_key);
     var options = {

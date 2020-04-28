@@ -2,7 +2,11 @@ const axios = require('axios').default;
 const config = require("../config");
 const create = require("../database/createRecord");
 
-//Update shopping list
+/**
+ * Update details in the shopping list
+ * @param params
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 async function updateShoppingList(params) {
     //Convert parameters to useful arrays
     var ingredients = JSON.parse(params.purchased);
@@ -30,7 +34,11 @@ async function updateShoppingList(params) {
     });
 }
 
-//Update ingredients
+/**
+ * Update ingredient details
+ * @param params
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 async function updateIngredient(params) {
     //Array of statements that will be sent in the axios request
     var parameters = await create.fetchIngredientInfo(params.name, params.amount, params.measurement);
@@ -52,7 +60,11 @@ async function updateIngredient(params) {
     });
 }
 
-//Update ingredient amount
+/**
+ * Update amount of ingredients in shopping list
+ * @param params
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 async function updateIngredientAmounts(params) {
     //Convert parameters to useful arrays
     var ingredients = JSON.parse(params.ingredients);
@@ -79,7 +91,11 @@ async function updateIngredientAmounts(params) {
     });
 }
 
-//Update recipe summary
+/**
+ * Update summary of the recipe
+ * @param params
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 function updateRecipeSummary(params) {
     //Array of statements that will be sent in the axios request
     var statements = [];
@@ -99,7 +115,11 @@ function updateRecipeSummary(params) {
     });
 }
 
-//Update recipe method
+/**
+ * Update method for the recipe
+ * @param params
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 function updateRecipeMethod(params) {
     //Array of statements that will be sent in the axios request
     var statements = [];
@@ -116,7 +136,11 @@ function updateRecipeMethod(params) {
     });
 }
 
-//Update recipe method
+/**
+ * Update method for the recipe
+ * @param params
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 async function updateRecipeIngredients(params)  {
     var ingredients = JSON.parse(params.ingredients);
 
