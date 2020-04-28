@@ -56,12 +56,13 @@ function fetchRecipe(recipe) {
     })
 }
 
-//Fetch all the recipes
-function fetchAllRecipes(user) {
+//Fetch recipes to search on and count of users making each recipe
+function fetchSearchRecipes(user) {
     return axios.post(config.url, {
         "statements": [
             {
-                "statement": "MATCH (u:User)-[m:makes]-(re:Recipe)-[r:contains]->(i:Ingredient) WHERE NOT ((re)<-[:makes]-(:User {name:$user})) RETURN distinct re,collect([i,r]);",
+                "statement": "MATCH (u:User)-[m:makes]-(re:Recipe)-[r:contains]->(i:Ingredient) " +
+                    "WHERE NOT ((re)<-[:makes]-(:User {name:$user})) RETURN distinct re,collect([i,r]);",
                 "parameters": {
                     "user": user,
                 }
@@ -129,7 +130,7 @@ function fetchShoppingList(params) {
 module.exports.fetchIngredients = fetchIngredients;
 module.exports.fetchRecipe = fetchRecipe;
 module.exports.fetchRecipes = fetchRecipes;
-module.exports.fetchAllRecipes = fetchAllRecipes;
+module.exports.fetchSearchRecipes = fetchSearchRecipes;
 module.exports.fetchShoppingList = fetchShoppingList;
 
 

@@ -72,7 +72,7 @@ beforeAll(() => {
 
 
 test('recipe search', async () => {
-    var recipeResponse = await match.fetchAllRecipes('User');
+    var recipeResponse = await match.fetchSearchRecipes('User');
     var recipes = recipeResponse.data.results;
     var ingredientResponse = await match.fetchIngredients('admin');
 
