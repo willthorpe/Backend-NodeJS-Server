@@ -1,7 +1,11 @@
 const axios = require('axios').default;
 const config = require("../config");
 
-//Delete ingredient for one user
+/**
+ * Delete ingredient for one user
+ * @param params
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 function deleteIngredient(params) {
     return axios.post(config.url, {
         "statements": [
@@ -16,7 +20,11 @@ function deleteIngredient(params) {
     });
 }
 
-//Delete recipe for one user
+/**
+ * Delete recipe for one user
+ * @param params
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 function deleteRecipe(params) {
     return axios.post(config.url, {
         "statements": [

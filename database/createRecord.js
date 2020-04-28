@@ -3,7 +3,11 @@ const config = require("../config");
 const edamam = require("../api/edamam");
 const tesco = require("../api/tesco");
 
-//Create nodes and relationships between user and ingredients
+/**
+ * Create nodes and relationships between user and ingredients
+ * @param params
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 async function createIngredientNodes(params) {
     //Array of statements that will be sent in the axios request
     var statements = [];
@@ -29,7 +33,11 @@ async function createIngredientNodes(params) {
     });
 }
 
-//Create nodes and relationships between user and recipes
+/**
+ * Create nodes and relationships between user and recipes
+ * @param params
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 async function createRecipeNodes(params) {
     //Convert parameters to useful arrays
     var ingredients = JSON.parse(params.ingredients);
@@ -52,10 +60,14 @@ async function createRecipeNodes(params) {
             var ingredientParameters = await fetchIngredientInfo(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["measurement"]);
             //Double check ingredient created
             statements = createIngredient(ingredients[i]["name"], ingredientParameters, statements);
-            statements = createIngredientUserRelationships(params.user, ingredients[i]["name"], 0, ingredients[i]["measurement"], '', ingredientParameters, statements);
+            statements = createIngredientUserRelationships(
+                params.user, ingredients[i]["name"], 0, ingredients[i]["measurement"], '', ingredientParameters, statements
+            );
 
             //Add links to recipe
-            statements = createIngredientRecipeRelationships(ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["measurement"], params.name, ingredientParameters, statements);
+            statements = createIngredientRecipeRelationships(
+                ingredients[i]["name"], ingredients[i]["amount"], ingredients[i]["measurement"], params.name, ingredientParameters, statements
+            );
         }
     }
     return axios.post(config.url, {
@@ -63,7 +75,11 @@ async function createRecipeNodes(params) {
     });
 }
 
-//Create nodes and relationships between user and recipes from spoonacular algorithm
+/**
+ * Create nodes and relationships between user and recipes from Spoonacular algorithm
+ * @param recipes
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 async function createRecipeNodesBulk(recipes) {
     //Array of statements that will be sent in the axios request
     var statements = [];
@@ -129,6 +145,12 @@ function createRecipeUserLink(params, userIngredients) {
     });
 }
 
+/**
+ * Create a statement to create user nodes
+ * @param user
+ * @param statements
+ * @returns {*}
+ */
 function createUser(user, statements) {
     statements.push({
         "statement": "MERGE (n:User {name:$name}) RETURN n",
@@ -139,6 +161,13 @@ function createUser(user, statements) {
     return statements;
 }
 
+/**
+ * Create a statement to create ingredient nodes
+ * @param ingredient
+ * @param parameters
+ * @param statements
+ * @returns {*}
+ */
 function createIngredient(ingredient, parameters, statements) {
     statements.push({
         "statement": "MERGE (n:Ingredient {name:$name, dietLabels:$dietLabels,healthLabels:$healthLabels}) RETURN n",
@@ -151,24 +180,17 @@ function createIngredient(ingredient, parameters, statements) {
     return statements;
 }
 
-function createRecipe(params, statements) {
-    if (params.tag == null) {
-        params.tag = "Dinner";
-    }
-    statements.push({
-        "statement": "MERGE (n:Recipe {name:$name,tag:$tag,servings:$servings,prepTime:$prepTime,cookTime:$cookTime,method:$method }) RETURN n",
-        "parameters": {
-            "name": params.name.toLowerCase(),
-            "tag": params.tag,
-            "servings": parseInt(params.servings),
-            "prepTime": parseInt(params.prepTime),
-            "cookTime": parseInt(params.cookTime),
-            "method": params.methods
-        }
-    });
-    return statements;
-}
-
+/**
+ * Create statements for creating relationships between ingredient and user nodes
+ * @param user
+ * @param ingredient
+ * @param amount
+ * @param measurement
+ * @param location
+ * @param parameters
+ * @param statements
+ * @returns {*}
+ */
 function createIngredientUserRelationships(user, ingredient, amount, measurement, location, parameters, statements) {
     //If the ingredient is part of the recipe that the user does not already store
     if (location === "" && amount === 0) {
@@ -204,6 +226,58 @@ function createIngredientUserRelationships(user, ingredient, amount, measurement
     return statements;
 }
 
+/**
+ * Creates statements for creating a recipe
+ * @param params
+ * @param statements
+ * @returns {*}
+ */
+function createRecipe(params, statements) {
+    if (params.tag == null) {
+        params.tag = "Dinner";
+    }
+    statements.push({
+        "statement": "MERGE (n:Recipe {name:$name,tag:$tag,servings:$servings,prepTime:$prepTime,cookTime:$cookTime,method:$method }) RETURN n",
+        "parameters": {
+            "name": params.name.toLowerCase(),
+            "tag": params.tag,
+            "servings": parseInt(params.servings),
+            "prepTime": parseInt(params.prepTime),
+            "cookTime": parseInt(params.cookTime),
+            "method": params.methods
+        }
+    });
+    return statements;
+}
+
+/**
+ * Creates statements for creating a relationship between a recipe and a user.
+ * @param user
+ * @param recipe
+ * @param statements
+ * @returns {*}
+ */
+function createRecipeUserRelationships(user, recipe, statements) {
+    statements.push({
+        "statement": "MATCH (u:User),(re:Recipe) WHERE u.name=$user and re.name=$recipe MERGE(u)- [r: makes] -> (re) return u, re",
+        "parameters": {
+            "user": user,
+            "recipe": recipe.toLowerCase(),
+        }
+    });
+    return statements;
+}
+
+/**
+ * Creates statements for the relationship between ingredients and recipes
+ * @param ingredient
+ * @param amount
+ * @param measurement
+ * @param recipe
+ * @param parameters
+ * @param statements
+ * @returns {*}
+ */
 function createIngredientRecipeRelationships(ingredient, amount, measurement, recipe, parameters, statements) {
     statements.push({
         "statement": "MATCH (i:Ingredient),(re:Recipe) WHERE i.name=$ingredient and re.name=$recipe " +
@@ -227,17 +301,13 @@ function createIngredientRecipeRelationships(ingredient, amount, measurement, re
     return statements;
 }
 
-function createRecipeUserRelationships(user, recipe, statements) {
-    statements.push({
-        "statement": "MATCH (u:User),(re:Recipe) WHERE u.name=$user and re.name=$recipe MERGE(u)- [r: makes] -> (re) return u, re",
-        "parameters": {
-            "user": user,
-            "recipe": recipe.toLowerCase(),
-        }
-    });
-    return statements;
-}
-
+/**
+ * Returns ingredient nutrition, weight and price data
+ * @param ingredient
+ * @param amount
+ * @param measurement
+ * @returns {Promise<{dietLabels: *, healthLabels: *, price: *, name: *, weight: *, calories: *}>}
+ */
 async function fetchIngredientInfo(ingredient, amount, measurement) {
     var nutrition = await edamam.fetchNutritionalInfo(ingredient, amount, measurement);
     var tescoData = await tesco.fetchPriceData(ingredient, amount, measurement);
@@ -252,24 +322,11 @@ async function fetchIngredientInfo(ingredient, amount, measurement) {
         "price": tescoData.uk.ghs.products.results[0].price,
     };
 
-    //Nutrition data
-    ingredientParameters["energy"] = 0;
-    ingredientParameters["fat"] = 0;
-    ingredientParameters["carbs"] = 0;
-    ingredientParameters["protein"] = 0;
-
-    if (nutrition.totalNutrients.ENERC_KCAL) {
-        ingredientParameters["energy"] = nutrition.totalNutrients.ENERC_KCAL.quantity;
-    }
-    if (nutrition.totalNutrients.FAT) {
-        ingredientParameters["fat"] = nutrition.totalNutrients.FAT.quantity;
-    }
-    if (nutrition.totalNutrients.CHOCDF) {
-        ingredientParameters["carbs"] = nutrition.totalNutrients.CHOCDF.quantity;
-    }
-    if (nutrition.totalNutrients.PROCNT) {
-        ingredientParameters["protein"] = nutrition.totalNutrients.PROCNT.quantity;
-    }
+    //Nutrition data - these can be null so need to convert null to 0.
+    ingredientParameters["energy"] = (nutrition.totalNutrients.ENERC_KCAL) ? nutrition.totalNutrients.ENERC_KCAL.quantity :0;
+    ingredientParameters["fat"] = (nutrition.totalNutrients.FAT) ? nutrition.totalNutrients.FAT.quantity : 0;
+    ingredientParameters["carbs"] = (nutrition.totalNutrients.CHOCDF) ? nutrition.totalNutrients.CHOCDF.quantity : 0;
+    ingredientParameters["protein"] = (nutrition.totalNutrients.PROCNT) ? nutrition.totalNutrients.PROCNT.quantity : 0;
 
     return ingredientParameters;
 }

@@ -1,12 +1,18 @@
 const axios = require('axios').default;
 const config = require("../config");
 
-//Fetch all the ingredients related to the user. 
+/**
+ * Fetch all the ingredients related to the user.
+ * @param user
+ * @returns {Promise<AxiosResponse<T>>}
+ */
 function fetchIngredients(user) {
     return axios.post(config.url, {
         "statements": [
             {
-                "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) WHERE u.name=$user and r.amount > 0 RETURN i,r ORDER BY i.name",
+                "statement": "MATCH (u:User)-[r:has]->(i:Ingredient) " +
+                    "WHERE u.name=$user and r.amount > 0 " +
+                    "RETURN i,r ORDER BY i.name",
                 "parameters": {
                     "user": user,
                 }
@@ -14,6 +20,27 @@ function fetchIngredients(user) {
         ],
     })
 }
+
+/**
+ * Fetch all the recipes related to the user.
+ * @param user
+ * @returns {Promise<AxiosResponse<T>>}
+ */
+function fetchRecipes(user) {
+    return axios.post(config.url, {
+        "statements": [
+            {
+                "statement": "MATCH (u:User)-[p:makes]->(re:Recipe)-[r:contains]->(i:Ingredient) " +
+                    "WHERE u.name=$user " +
+                    "RETURN distinct re,collect([i,r]) ORDER BY re.name",
+                "parameters": {
+                    "user": user,
+                }
+            },
+        ],
+    })
+}
+
 
 //Fetch a single recipe. 
 function fetchRecipe(recipe) {
@@ -41,34 +68,6 @@ function fetchAllRecipes(user) {
             },
             {
                 "statement": "MATCH (re:Recipe)<-[r:makes]->(u:User) RETURN re,count(r)"
-            },
-        ],
-    })
-}
-
-//Fetch all the recipes related to the user. 
-function fetchRecipes(user) {
-    return axios.post(config.url, {
-        "statements": [
-            {
-                "statement": "MATCH (u:User)-[p:makes]->(re:Recipe)-[r:contains]->(i:Ingredient) WHERE u.name=$user RETURN distinct re,collect([i,r]) ORDER BY re.name",
-                "parameters": {
-                    "user": user,
-                }
-            },
-        ],
-    })
-}
-
-//Fetch all the recipes related to the user.
-function fetchRecipeGraphData(user) {
-    return axios.post(config.url, {
-        "statements": [
-            {
-                "statement": "MATCH (u:User)-[p:makes]->(re:Recipe)-[r:contains]->(i:Ingredient) WHERE u.name=$user RETURN distinct re,collect([i,r])",
-                "parameters": {
-                    "user": user,
-                }
             },
         ],
     })
@@ -132,6 +131,5 @@ module.exports.fetchRecipe = fetchRecipe;
 module.exports.fetchRecipes = fetchRecipes;
 module.exports.fetchAllRecipes = fetchAllRecipes;
 module.exports.fetchShoppingList = fetchShoppingList;
-module.exports.fetchRecipeGraphData = fetchRecipeGraphData;
 
 

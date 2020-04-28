@@ -72,7 +72,7 @@ app.post("/recipe", function (req, res) {
         });
 });
 
-app.post("/link", function (req, res) {
+app.post("/recipe/link", function (req, res) {
     var parameters = req.body;
     //Link recipe to the user
     fetch.fetchIngredients(parameters.user)
@@ -142,7 +142,7 @@ app.get("/ingredient", function (req, res) {
         });
 });
 
-app.get("/nextRecipe", function (req, res) {
+app.get("/recipe/next", function (req, res) {
     var parameters = req.query;
 
     fetch.fetchRecipe(parameters.recipe)
@@ -404,7 +404,7 @@ app.patch("/recipe/ingredients", function (req, res) {
         });
 });
 
-app.get("/search", function (req, res) {
+app.get("/recipe/search", function (req, res) {
     var parameters = req.query;
     var recipes = [];
     //Return results for the user query
@@ -474,55 +474,6 @@ app.get("/pull", function (req, res) {
         .catch(function (error) {
             if (error) {
                 res.send("Error when fetching recipes " + error)
-            }
-        });
-});
-
-app.get("/graph/recipe", function (req, res) {
-    var parameters = req.query;
-    fetch.fetchRecipeGraphData(parameters.user)
-    //Update the shopping list with bought amounts
-        .then(function (response) {
-            if (response.data.results[0].data) {
-                var recipes = response.data.results;
-                var calendars = JSON.parse(parameters.calendars);
-                var data = [];
-
-                for (var recipe = 0; recipe < recipes[0].data.length; recipe++) {
-                    data.push(
-                        {
-                            'recipe': recipes[0].data[recipe].row[0].name,
-                            'amount': 0
-                        })
-                }
-
-                for (var datum = 0; datum < data.length; datum++) {
-                    for (var calendar = 0; calendar < calendars.length; calendar++) {
-                        for (var i = 0; i < calendars[calendar].breakfast.length; i++) {
-                            if (calendars[calendar].breakfast[i] === data[datum].recipe) {
-                                data[datum].amount++;
-                            }
-                        }
-                        for (var j = 0; j < calendars[calendar].lunch.length; j++) {
-                            if (calendars[calendar].lunch[j] === data[datum].recipe) {
-                                data[datum].amount++;
-                            }
-                        }
-                        for (var k = 0; k < calendars[calendar].dinner.length; k++) {
-                            if (calendars[calendar].dinner[k] === data[datum].recipe) {
-                                data[datum].amount++;
-                            }
-                        }
-                    }
-                }
-                return res.send(data);
-            } else {
-                res.send("Error when fetching recipe graph" + response.data.errors[0].code + " " + response.data.errors[0].message);
-            }
-        })
-        .catch(function (error) {
-            if (error) {
-                res.send("Error when updating recipe graph " + error)
             }
         });
 });
