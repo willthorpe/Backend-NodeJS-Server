@@ -23,7 +23,7 @@ The server handles most of the computation for the app through its API that the 
 * GET	   /pull	            Pull recipes into the app from the Spoonacular API
 
 ### How to Use:
-Clone this repository using git clone
-Copy example_config.js to config.js and update for your environment
-Go to the root of the cloned folder and run npm install to install Javascript packages
-Run node app.js to run the app at 127.0.0.1:3000
+* Clone this repository using git clone
+* Copy example_config.js to config.js and update for your environment
+* Go to the root of the cloned folder and run npm install to install Javascript packages
+* Run node app.js to run the app at 127.0.0.1:3000
