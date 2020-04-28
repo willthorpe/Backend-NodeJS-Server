@@ -96,7 +96,7 @@ test('fetch recipes for user', async () => {
     }];
     expect(responseData[0]['recipeName']).toBe('Just Chicken');
     expect(responseData[0]['servings']).toBe(2);
-    expect(responseData[0]['measurement']).toBe('Chicken Breast');
+    expect(responseData[0]['name']).toBe('Chicken Breast');
     expect(responseData[0]['amount']).toBe(1);
     expect(responseData[0]['measurement']).toBe('number');
 });
