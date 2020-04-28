@@ -61,7 +61,7 @@ function fetchAllRecipes(user) {
     return axios.post(config.url, {
         "statements": [
             {
-                "statement": "MATCH (u:User)-[m:makes]->(re:Recipe)-[r:contains]-> (i:Ingredient) where u.name <> $user RETURN distinct re,collect([i,r])",
+                "statement": "MATCH (u:User)-[m:makes]-(re:Recipe)-[r:contains]->(i:Ingredient) WHERE NOT ((re)<-[:makes]-(:User {name:$user})) RETURN distinct re,collect([i,r]);",
                 "parameters": {
                     "user": user,
                 }
